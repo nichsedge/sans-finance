@@ -1,28 +1,32 @@
 #!/bin/bash
 
-# Script to push portfolio CSV files to the device for importing
+# Script to push portfolio JSON snapshots to the device for importing
 # Usage: ./push_portfolio.sh [filename]
 
-DEFAULT_FILE="2026-05-11_snapshot.json"
-FILE="${1:-$DEFAULT_FILE}"
+DEFAULT_PATTERN="*.json"
+PATTERN="${1:-$DEFAULT_PATTERN}"
 DEST="/sdcard/Download/"
 
-if [ ! -f "$FILE" ]; then
-    echo "❌ Error: File '$FILE' not found in the current directory."
+# Use nullglob to handle no matches gracefully
+shopt -s nullglob
+FILES=($PATTERN)
+
+if [ ${#FILES[@]} -eq 0 ]; then
+    echo "❌ Error: No files matching '$PATTERN' found in the current directory."
     echo "Available snapshot files:"
-    ls *.{csv,json} 2>/dev/null
+    ls *.json 2>/dev/null
     exit 1
 fi
 
-echo "🔄 Preparing to push '$FILE' to device..."
+echo "🔄 Preparing to push ${#FILES[@]} file(s) to device..."
 
 # Push to device
-adb push "$FILE" "$DEST"
+adb push "${FILES[@]}" "$DEST"
 
 if [ $? -eq 0 ]; then
-    echo "✅ Successfully pushed '$FILE' to '$DEST'"
-    echo "📱 You can now import this file from the app's Portfolio screen."
+    echo "✅ Successfully pushed file(s) to '$DEST'"
+    echo "📱 You can now import them from the app's Portfolio screen."
 else
-    echo "❌ Failed to push file. Is your device connected via ADB?"
+    echo "❌ Failed to push file(s). Is your device connected via ADB?"
     exit 1
 fi

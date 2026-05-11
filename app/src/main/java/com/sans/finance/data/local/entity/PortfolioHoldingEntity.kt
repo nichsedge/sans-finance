@@ -28,6 +28,7 @@ data class PortfolioHoldingEntity(
     val amount: Double,
     val price: Double?,
     @ColumnInfo(name = "value_idr") val valueIdr: Double,
+    @ColumnInfo(name = "asset_class") val assetClass: String,
     val account: String,
     val details: String?
 )

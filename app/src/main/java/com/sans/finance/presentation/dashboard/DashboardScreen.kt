@@ -1,8 +1,10 @@
 package com.sans.finance.presentation.dashboard
+import com.sans.finance.presentation.dashboard.WealthDistributionTab
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -129,8 +131,10 @@ fun DashboardScreen(
 
             if (state.wealthDistribution.isNotEmpty()) {
                 item {
-                    WealthDistributionCard(
+                WealthDistributionCard(
                     distribution = state.wealthDistribution,
+                    selectedTab = state.wealthDistributionTab,
+                    onTabSelected = viewModel::setWealthDistributionTab,
                     currencyCode = state.currentCurrency,
                     isPrivacyModeEnabled = state.isPrivacyModeEnabled
                 )
@@ -300,7 +304,13 @@ fun ForecastCard(projectedBalance: Long, trendData: List<Long>, currencyCode: St
 }
 
 @Composable
-fun WealthDistributionCard(distribution: Map<String, Long>, currencyCode: String, isPrivacyModeEnabled: Boolean) {
+fun WealthDistributionCard(
+    distribution: Map<String, Long>,
+    selectedTab: WealthDistributionTab,
+    onTabSelected: (WealthDistributionTab) -> Unit,
+    currencyCode: String,
+    isPrivacyModeEnabled: Boolean
+) {
     val total = distribution.values.sumOf { kotlin.math.abs(it) }.coerceAtLeast(1L)
 
     Card(
@@ -311,11 +321,57 @@ fun WealthDistributionCard(distribution: Map<String, Long>, currencyCode: String
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                "Wealth Distribution",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Wealth Distribution",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                WealthDistributionTab.values().forEach { tab ->
+                    val isSelected = tab == selectedTab
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(MaterialTheme.shapes.small)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary 
+                                else Color.Transparent
+                            )
+                            .clickable { onTabSelected(tab) }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = when(tab) {
+                                WealthDistributionTab.CURRENCY -> "Currency"
+                                WealthDistributionTab.ASSET_CLASS -> "Asset Class"
+                                WealthDistributionTab.CATEGORY -> "Category"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary 
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Simple Bar Chart
@@ -346,8 +402,11 @@ fun WealthDistributionCard(distribution: Map<String, Long>, currencyCode: String
             Spacer(modifier = Modifier.height(16.dp))
 
             // Legend
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 distribution.entries.forEachIndexed { index, entry ->
+                    val entryValue = kotlin.math.abs(entry.value)
+                    val percentage = (entryValue.toFloat() / total.toFloat() * 100).toInt()
+                    
                     val color = when (index % 4) {
                         0 -> MaterialTheme.colorScheme.primary
                         1 -> MaterialTheme.colorScheme.secondary
@@ -361,11 +420,18 @@ fun WealthDistributionCard(distribution: Map<String, Long>, currencyCode: String
                                 .background(color, MaterialTheme.shapes.small)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            entry.key,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f)
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                entry.key,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "$percentage%",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         PrivacyText(
                             amount = entry.value,
                             currencyCode = currencyCode,

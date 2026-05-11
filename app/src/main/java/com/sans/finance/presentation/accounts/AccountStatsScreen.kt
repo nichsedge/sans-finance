@@ -1,5 +1,8 @@
 package com.sans.finance.presentation.accounts
 
+import androidx.compose.ui.res.stringResource
+import com.sans.finance.R
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,7 +68,7 @@ fun AccountStatsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Total Stats", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.account_stats), fontWeight = FontWeight.Bold)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = viewModel::onPreviousMonth) {
                                 Icon(
@@ -133,7 +136,7 @@ fun AccountStatsScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        TotalStatsLineChart(history = state.netWorthHistory, currencyCode = state.currentCurrency)
+                        TotalStatsLineChart(history = state.balanceHistory, currencyCode = state.currentCurrency)
                     }
                 }
 

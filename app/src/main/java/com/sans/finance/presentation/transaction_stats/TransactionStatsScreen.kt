@@ -1,4 +1,4 @@
-package com.sans.finance.presentation.stats
+package com.sans.finance.presentation.transaction_stats
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -98,9 +98,9 @@ val pieChartColors = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen(
+fun TransactionStatsScreen(
     onBack: () -> Unit,
-    viewModel: StatsViewModel = hiltViewModel()
+    viewModel: TransactionStatsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
@@ -141,7 +141,7 @@ fun StatsScreen(
                     onPrevious = viewModel::onPreviousPeriod,
                     onNext = viewModel::onNextPeriod,
                     onDateClick = {
-                        if (state.selectedPeriodType == StatsPeriodType.CUSTOM) showDatePicker =
+                        if (state.selectedPeriodType == TransactionStatsPeriodType.CUSTOM) showDatePicker =
                             true
                     }
                 )
@@ -214,10 +214,10 @@ fun StatsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeriodTypeSelector(
-    selectedType: StatsPeriodType,
-    onTypeSelected: (StatsPeriodType) -> Unit
+    selectedType: TransactionStatsPeriodType,
+    onTypeSelected: (TransactionStatsPeriodType) -> Unit
 ) {
-    val types = StatsPeriodType.values()
+    val types = TransactionStatsPeriodType.values()
     val options = listOf(
         stringResource(R.string.weekly),
         stringResource(R.string.monthly),
@@ -247,7 +247,7 @@ fun PeriodTypeSelector(
 
 @Composable
 fun DateNavigator(
-    state: StatsState,
+    state: TransactionStatsState,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onDateClick: () -> Unit
@@ -261,7 +261,7 @@ fun DateNavigator(
     ) {
         IconButton(
             onClick = onPrevious,
-            enabled = state.selectedPeriodType != StatsPeriodType.CUSTOM
+            enabled = state.selectedPeriodType != TransactionStatsPeriodType.CUSTOM
         ) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous")
         }
@@ -270,13 +270,13 @@ fun DateNavigator(
             onClick = onDateClick,
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            enabled = state.selectedPeriodType == StatsPeriodType.CUSTOM
+            enabled = state.selectedPeriodType == TransactionStatsPeriodType.CUSTOM
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (state.selectedPeriodType == StatsPeriodType.CUSTOM) {
+                if (state.selectedPeriodType == TransactionStatsPeriodType.CUSTOM) {
                     Icon(
                         Icons.Default.CalendarToday,
                         contentDescription = null,
@@ -292,17 +292,17 @@ fun DateNavigator(
             }
         }
 
-        IconButton(onClick = onNext, enabled = state.selectedPeriodType != StatsPeriodType.CUSTOM) {
+        IconButton(onClick = onNext, enabled = state.selectedPeriodType != TransactionStatsPeriodType.CUSTOM) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next")
         }
     }
 }
 
 @Composable
-fun getPeriodText(state: StatsState): String {
+fun getPeriodText(state: TransactionStatsState): String {
     val cal = state.currentPeriodDate
     return when (state.selectedPeriodType) {
-        StatsPeriodType.WEEKLY -> {
+        TransactionStatsPeriodType.WEEKLY -> {
             val start = cal.clone() as Calendar
             start.set(Calendar.DAY_OF_WEEK, start.firstDayOfWeek)
             val end = start.clone() as Calendar
@@ -311,17 +311,17 @@ fun getPeriodText(state: StatsState): String {
             "${df.format(start.time)} - ${df.format(end.time)}"
         }
 
-        StatsPeriodType.MONTHLY -> {
+        TransactionStatsPeriodType.MONTHLY -> {
             val df = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             df.format(cal.time)
         }
 
-        StatsPeriodType.ANNUALLY -> {
+        TransactionStatsPeriodType.ANNUALLY -> {
             val df = SimpleDateFormat("yyyy", Locale.getDefault())
             df.format(cal.time)
         }
 
-        StatsPeriodType.CUSTOM -> {
+        TransactionStatsPeriodType.CUSTOM -> {
             if (state.customStartDate != null && state.customEndDate != null) {
                 val df = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                 "${df.format(Date(state.customStartDate))} - ${df.format(Date(state.customEndDate))}"
@@ -445,7 +445,7 @@ fun CategoryBreakdown(
 
 @Composable
 fun CategoryDetailView(
-    state: StatsState,
+    state: TransactionStatsState,
     onBack: () -> Unit
 ) {
     val category = state.selectedCategory ?: return
@@ -583,7 +583,7 @@ fun SectionTitle(title: String, icon: ImageVector? = null) {
 fun TrendChart(
     title: String,
     trendData: List<DaySpent>,
-    period: StatsPeriodType,
+    period: TransactionStatsPeriodType,
     currencyCode: String = "USD"
 ) {
     SectionTitle(title, icon = Icons.Default.Insights)

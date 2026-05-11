@@ -266,7 +266,7 @@ fun HoldingItem(holding: PortfolioHoldingEntity, isPrivacyModeEnabled: Boolean) 
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(holding.asset, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Text(holding.source, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${holding.source} • ${holding.assetClass}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         
         Column(horizontalAlignment = Alignment.End) {

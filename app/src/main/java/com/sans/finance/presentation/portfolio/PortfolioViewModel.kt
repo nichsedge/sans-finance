@@ -7,7 +7,6 @@ import com.sans.finance.data.local.dao.CategoryTotal
 import com.sans.finance.data.local.dao.SnapshotTotal
 import com.sans.finance.data.local.entity.PortfolioHoldingEntity
 import com.sans.finance.data.util.LocaleManager
-import com.sans.finance.data.util.PortfolioCsvImporter
 import com.sans.finance.data.util.PortfolioJsonImporter
 import com.sans.finance.domain.repository.PortfolioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,7 +67,12 @@ class PortfolioViewModel @Inject constructor(
         val selectedDate = dates[validIndex]
 
         val holdings = repository.getSnapshotByDateSync(selectedDate)
-        val categoryTotals = repository.getCategoryTotals(selectedDate)
+        val categoryTotals = repository.getCategoryTotals(selectedDate).sortedByDescending { it.totalIdr }
+        val sortedHoldingsByCategory = holdings.groupBy { it.category }
+            .mapValues { entry -> entry.value.sortedByDescending { it.valueIdr } }
+            .toList()
+            .sortedByDescending { it.second.sumOf { h -> h.valueIdr } }
+            .toMap()
 
         val previousDate = dates.getOrNull(validIndex + 1)
         val previousTotalIdr = if (previousDate != null) {
@@ -79,7 +83,7 @@ class PortfolioViewModel @Inject constructor(
 
         PortfolioScreenState(
             holdings = holdings,
-            holdingsByCategory = holdings.groupBy { it.category },
+            holdingsByCategory = sortedHoldingsByCategory,
             categoryTotals = categoryTotals,
             totalValueIdr = currentTotal?.totalIdr ?: 0.0,
             totalValueUsd = currentTotal?.totalUsd ?: 0.0,
@@ -120,19 +124,7 @@ class PortfolioViewModel @Inject constructor(
     fun importFile(uri: Uri) {
         viewModelScope.launch {
             try {
-                val contentResolver = context.contentResolver
-                val type = contentResolver.getType(uri)
-                val fileName = getFileName(uri)
-
-                val (date, items, exchangeRate) = when {
-                    type == "application/json" || fileName?.endsWith(".json", ignoreCase = true) == true -> {
-                        PortfolioJsonImporter.parse(context, uri)
-                    }
-                    else -> {
-                        val (d, i) = PortfolioCsvImporter.parse(context, uri)
-                        Triple(d, i, null)
-                    }
-                }
+                val (date, items, exchangeRate) = PortfolioJsonImporter.parse(context, uri)
 
                 if (items.isEmpty()) {
                     _importMessage.value = "No valid entries found in file"
@@ -147,28 +139,7 @@ class PortfolioViewModel @Inject constructor(
         }
     }
 
-    private fun getFileName(uri: Uri): String? {
-        var result: String? = null
-        if (uri.scheme == "content") {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val index = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                    if (index >= 0) {
-                        result = it.getString(index)
-                    }
-                }
-            }
-        }
-        if (result == null) {
-            result = uri.path
-            val cut = result?.lastIndexOf('/')
-            if (cut != null && cut != -1) {
-                result = result.substring(cut + 1)
-            }
-        }
-        return result
-    }
+
 
     fun clearImportMessage() {
         _importMessage.value = null

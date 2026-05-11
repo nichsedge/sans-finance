@@ -208,7 +208,7 @@ class AddTransactionViewModel @Inject constructor(
             val expense = Expense(
                 id = editExpenseId ?: 0,
                 date = selectedDate,
-                note = note.ifBlank { "Uncategorized Item" },
+                note = note.trim(),
                 amount = amountInCents,
                 categoryId = categoryId,
                 accountId = accountId,

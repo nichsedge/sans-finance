@@ -31,6 +31,7 @@ data class HoldingJson(
     val amount: Double = 0.0,
     @SerialName("value_idr") val valueIdr: Double = 0.0,
     @SerialName("value_usd") val valueUsd: Double = 0.0,
+    @SerialName("asset_class") val assetClass: String = "Other",
     val account: String? = null,
     val details: String? = null
 )
@@ -72,6 +73,7 @@ object PortfolioJsonImporter {
                 amount = holding.amount,
                 price = extractPrice(holding.details),
                 valueIdr = holding.valueIdr,
+                assetClass = holding.assetClass,
                 account = holding.account ?: "",
                 details = holding.details
             )

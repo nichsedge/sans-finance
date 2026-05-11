@@ -1,4 +1,4 @@
-package com.sans.finance.presentation.stats
+package com.sans.finance.presentation.transaction_stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.update
 import java.util.Calendar
 import javax.inject.Inject
 
-enum class StatsPeriodType {
+enum class TransactionStatsPeriodType {
     WEEKLY, MONTHLY, ANNUALLY, CUSTOM
 }
 
@@ -27,8 +27,8 @@ enum class TransactionType {
     INCOME, EXPENSE
 }
 
-data class StatsState(
-    val selectedPeriodType: StatsPeriodType = StatsPeriodType.MONTHLY,
+data class TransactionStatsState(
+    val selectedPeriodType: TransactionStatsPeriodType = TransactionStatsPeriodType.MONTHLY,
     val selectedTransactionType: TransactionType = TransactionType.EXPENSE,
     val currentPeriodDate: Calendar = CalendarUtils.getInstance(),
     val customStartDate: Long? = null,
@@ -44,13 +44,13 @@ data class StatsState(
 )
 
 @HiltViewModel
-class StatsViewModel @Inject constructor(
+class TransactionStatsViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository,
     private val localeManager: com.sans.finance.data.util.LocaleManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(StatsState())
-    val state: StateFlow<StatsState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(TransactionStatsState())
+    val state: StateFlow<TransactionStatsState> = _state.asStateFlow()
 
     private var dataJob: Job? = null
 
@@ -59,7 +59,7 @@ class StatsViewModel @Inject constructor(
         loadData()
     }
 
-    fun onPeriodTypeSelected(type: StatsPeriodType) {
+    fun onPeriodTypeSelected(type: TransactionStatsPeriodType) {
         _state.update { it.copy(selectedPeriodType = type, selectedCategory = null) }
         loadData()
     }
@@ -78,10 +78,10 @@ class StatsViewModel @Inject constructor(
         _state.update {
             val nextDate = it.currentPeriodDate.clone() as Calendar
             when (it.selectedPeriodType) {
-                StatsPeriodType.WEEKLY -> nextDate.add(Calendar.WEEK_OF_YEAR, 1)
-                StatsPeriodType.MONTHLY -> nextDate.add(Calendar.MONTH, 1)
-                StatsPeriodType.ANNUALLY -> nextDate.add(Calendar.YEAR, 1)
-                StatsPeriodType.CUSTOM -> {}
+                TransactionStatsPeriodType.WEEKLY -> nextDate.add(Calendar.WEEK_OF_YEAR, 1)
+                TransactionStatsPeriodType.MONTHLY -> nextDate.add(Calendar.MONTH, 1)
+                TransactionStatsPeriodType.ANNUALLY -> nextDate.add(Calendar.YEAR, 1)
+                TransactionStatsPeriodType.CUSTOM -> {}
             }
             it.copy(currentPeriodDate = nextDate)
         }
@@ -92,10 +92,10 @@ class StatsViewModel @Inject constructor(
         _state.update {
             val prevDate = it.currentPeriodDate.clone() as Calendar
             when (it.selectedPeriodType) {
-                StatsPeriodType.WEEKLY -> prevDate.add(Calendar.WEEK_OF_YEAR, -1)
-                StatsPeriodType.MONTHLY -> prevDate.add(Calendar.MONTH, -1)
-                StatsPeriodType.ANNUALLY -> prevDate.add(Calendar.YEAR, -1)
-                StatsPeriodType.CUSTOM -> {}
+                TransactionStatsPeriodType.WEEKLY -> prevDate.add(Calendar.WEEK_OF_YEAR, -1)
+                TransactionStatsPeriodType.MONTHLY -> prevDate.add(Calendar.MONTH, -1)
+                TransactionStatsPeriodType.ANNUALLY -> prevDate.add(Calendar.YEAR, -1)
+                TransactionStatsPeriodType.CUSTOM -> {}
             }
             it.copy(currentPeriodDate = prevDate)
         }
@@ -105,7 +105,7 @@ class StatsViewModel @Inject constructor(
     fun onCustomDateRangeSelected(start: Long, end: Long) {
         _state.update {
             it.copy(
-                selectedPeriodType = StatsPeriodType.CUSTOM,
+                selectedPeriodType = TransactionStatsPeriodType.CUSTOM,
                 customStartDate = start,
                 customEndDate = end,
                 selectedCategory = null
@@ -165,10 +165,10 @@ class StatsViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun getRange(state: StatsState): Pair<Long, Long> {
+    private fun getRange(state: TransactionStatsState): Pair<Long, Long> {
         val cal = state.currentPeriodDate.clone() as Calendar
         return when (state.selectedPeriodType) {
-            StatsPeriodType.WEEKLY -> {
+            TransactionStatsPeriodType.WEEKLY -> {
                 cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
                 cal.set(Calendar.HOUR_OF_DAY, 0)
                 cal.set(Calendar.MINUTE, 0)
@@ -180,7 +180,7 @@ class StatsViewModel @Inject constructor(
                 Pair(since, until)
             }
 
-            StatsPeriodType.MONTHLY -> {
+            TransactionStatsPeriodType.MONTHLY -> {
                 cal.set(Calendar.DAY_OF_MONTH, 1)
                 cal.set(Calendar.HOUR_OF_DAY, 0)
                 cal.set(Calendar.MINUTE, 0)
@@ -192,7 +192,7 @@ class StatsViewModel @Inject constructor(
                 Pair(since, until)
             }
 
-            StatsPeriodType.ANNUALLY -> {
+            TransactionStatsPeriodType.ANNUALLY -> {
                 cal.set(Calendar.DAY_OF_YEAR, 1)
                 cal.set(Calendar.HOUR_OF_DAY, 0)
                 cal.set(Calendar.MINUTE, 0)
@@ -204,7 +204,7 @@ class StatsViewModel @Inject constructor(
                 Pair(since, until)
             }
 
-            StatsPeriodType.CUSTOM -> {
+            TransactionStatsPeriodType.CUSTOM -> {
                 Pair(state.customStartDate ?: 0L, state.customEndDate ?: Long.MAX_VALUE)
             }
         }
