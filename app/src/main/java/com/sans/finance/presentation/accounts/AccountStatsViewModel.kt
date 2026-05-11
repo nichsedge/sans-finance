@@ -20,7 +20,7 @@ import javax.inject.Inject
 data class AccountStatsState(
     val selectedDate: Calendar = CalendarUtils.getInstance(),
     val totalBalance: Long = 0L,
-    val netWorthHistory: List<Pair<String, Long>> = emptyList(),
+    val balanceHistory: List<Pair<String, Long>> = emptyList(),
     val incomeExpenseHistory: List<Triple<String, Long, Long>> = emptyList(),
     val currentCurrency: String = "USD",
     val isLoading: Boolean = true
@@ -46,13 +46,13 @@ class AccountStatsViewModel @Inject constructor(
             accounts.filter { it.type == "Credit Card" || it.type == "Loan" }.sumOf { it.balance }
         val currentTotal = currentAssets - currentLiabilities
 
-        val netWorthHistory = mutableListOf<Pair<String, Long>>()
+        val balanceHistory = mutableListOf<Pair<String, Long>>()
         val incomeExpenseHistory = mutableListOf<Triple<String, Long, Long>>()
 
         val cal = date.clone() as Calendar
         val monthFormat = SimpleDateFormat("MMM", Locale.US)
 
-        var runningNetWorth = currentTotal
+        var runningBalance = currentTotal
 
         // If the selected date is in the future relative to "now", we might need to adjust.
         // But for simplicity, let's assume we calculate backwards from the selected date's month end.
@@ -67,7 +67,7 @@ class AccountStatsViewModel @Inject constructor(
             ))
 
         var tempCal = now.clone() as Calendar
-        var simulatedNetWorthAtSelectedDate = currentTotal
+        var simulatedBalanceAtSelectedDate = currentTotal
 
         for (i in 0 until monthsToRevert) {
             tempCal.set(Calendar.DAY_OF_MONTH, 1)
@@ -85,12 +85,12 @@ class AccountStatsViewModel @Inject constructor(
             val netFlow = txns.filter { it.type == "INCOME" }
                 .sumOf { it.amount } - txns.filter { it.type == "EXPENSE" }.sumOf { it.amount }
 
-            simulatedNetWorthAtSelectedDate -= netFlow
+            simulatedBalanceAtSelectedDate -= netFlow
             tempCal.add(Calendar.MONTH, -1)
         }
 
         var historyCal = date.clone() as Calendar
-        var historyNetWorth = simulatedNetWorthAtSelectedDate
+        var historyBalance = simulatedBalanceAtSelectedDate
 
         for (i in 0 until 6) {
             historyCal.set(Calendar.DAY_OF_MONTH, 1)
@@ -106,21 +106,21 @@ class AccountStatsViewModel @Inject constructor(
             val income = txns.filter { it.type == "INCOME" }.sumOf { it.amount }
             val expense = txns.filter { it.type == "EXPENSE" }.sumOf { it.amount }
 
-            netWorthHistory.add(0, Pair(monthFormat.format(historyCal.time), historyNetWorth))
+            balanceHistory.add(0, Pair(monthFormat.format(historyCal.time), historyBalance))
             incomeExpenseHistory.add(
                 0,
                 Triple(monthFormat.format(historyCal.time), income, expense)
             )
 
             val netFlow = income - expense
-            historyNetWorth -= netFlow
+            historyBalance -= netFlow
             historyCal.add(Calendar.MONTH, -1)
         }
 
         AccountStatsState(
             selectedDate = date,
-            totalBalance = simulatedNetWorthAtSelectedDate,
-            netWorthHistory = netWorthHistory,
+            totalBalance = simulatedBalanceAtSelectedDate,
+            balanceHistory = balanceHistory,
             incomeExpenseHistory = incomeExpenseHistory,
             currentCurrency = localeManager.getCurrency(),
             isLoading = false

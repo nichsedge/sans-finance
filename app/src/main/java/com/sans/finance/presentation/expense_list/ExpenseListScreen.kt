@@ -109,7 +109,7 @@ fun ExpenseListScreen(
                 title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onStatsClick) {
-                        Icon(Icons.Default.QueryStats, contentDescription = "Statistics")
+                        Icon(Icons.Default.QueryStats, contentDescription = "Transaction Statistics")
                     }
                     IconButton(onClick = onInstallmentsClick) {
                         Icon(

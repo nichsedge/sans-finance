@@ -80,7 +80,7 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                     navController.navigate(Screen.Installments)
                 },
                 onStatsClick = {
-                    navController.navigate(Screen.Stats)
+                    navController.navigate(Screen.TransactionStats)
                 },
                 onExpenseClick = { id ->
                     navController.navigate(Screen.EditExpense(id))
@@ -99,8 +99,8 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                 onBack = { navController.popBackStack() }
             )
         }
-        composable<Screen.Stats> {
-            com.sans.finance.presentation.stats.StatsScreen(
+        composable<Screen.TransactionStats> {
+            com.sans.finance.presentation.transaction_stats.TransactionStatsScreen(
                 onBack = { navController.popBackStack() }
             )
         }

@@ -26,7 +26,7 @@ sealed class Screen {
     object Installments : Screen()
 
     @Serializable
-    object Stats : Screen()
+    object TransactionStats : Screen()
 
     @Serializable
     object Settings : Screen()

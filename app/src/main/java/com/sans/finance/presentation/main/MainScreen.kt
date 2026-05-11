@@ -67,7 +67,7 @@ fun MainScreen(
                         rootNavController.navigate(Screen.Installments)
                     },
                     onStatsClick = {
-                        rootNavController.navigate(Screen.Stats)
+                        rootNavController.navigate(Screen.TransactionStats)
                     },
                     onExpenseClick = { id ->
                         rootNavController.navigate(Screen.EditExpense(id))

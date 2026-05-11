@@ -77,7 +77,7 @@ fun AccountScreen(
                     IconButton(onClick = onStatsClick) {
                         Icon(
                             imageVector = Icons.Default.QueryStats,
-                            contentDescription = "Stats"
+                            contentDescription = "Account Statistics"
                         )
                     }
                     IconButton(onClick = { viewModel.togglePrivacyMode() }) {

@@ -39,8 +39,13 @@ data class DashboardState(
     val currentCurrency: String = "USD",
     val last30DaysTrend: List<Long> = emptyList(),
     val daysLeftInMonth: Int = 0,
-    val isPrivacyModeEnabled: Boolean = false
+    val isPrivacyModeEnabled: Boolean = false,
+    val wealthDistributionTab: WealthDistributionTab = WealthDistributionTab.CATEGORY
 )
+
+enum class WealthDistributionTab {
+    CURRENCY, ASSET_CLASS, CATEGORY
+}
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -52,6 +57,8 @@ class DashboardViewModel @Inject constructor(
     private val localeManager: com.sans.finance.data.util.LocaleManager
 ) : ViewModel() {
 
+    private val _wealthDistributionTab = kotlinx.coroutines.flow.MutableStateFlow(WealthDistributionTab.CATEGORY)
+
     val state = combine(
         accountRepository.getAllAccounts(),
         expenseRepository.getExpensesBetween(0, Long.MAX_VALUE),
@@ -60,7 +67,8 @@ class DashboardViewModel @Inject constructor(
         budgetRepository.getAllBudgets(),
         portfolioRepository.getTotalValueOverTime(),
         portfolioRepository.getLatestSnapshot(),
-        localeManager.privacyMode
+        localeManager.privacyMode,
+        _wealthDistributionTab
     ) { flows: Array<Any?> ->
         val accounts = flows[0] as List<com.sans.finance.data.local.entity.AccountEntity>
         val transactions = flows[1] as List<com.sans.finance.domain.model.Expense>
@@ -70,30 +78,34 @@ class DashboardViewModel @Inject constructor(
         val portfolioHistory = flows[5] as List<SnapshotTotal>
         val latestHoldings = flows[6] as List<PortfolioHoldingEntity>
         val privacyMode = flows[7] as Boolean
+        val selectedTab = flows[8] as WealthDistributionTab
 
         val latestPortfolioIdr = portfolioHistory.lastOrNull()?.totalIdr ?: 0.0
         val portfolioAssets = (latestPortfolioIdr * 100).toLong()
 
-        val accountAssets =
-            accounts.filter { it.type != "Credit Card" && it.type != "Loan" }.sumOf { it.balance }
-        val assets = accountAssets + portfolioAssets
-        val liabilities =
-            accounts.filter { it.type == "Credit Card" || it.type == "Loan" }.sumOf { it.balance }
+        val assets = portfolioAssets
+        val liabilities = 0L // Accounts are agnostic for Net Worth
 
         val recurringNet = recurring.sumOf {
             if (it.type == "INCOME") it.amount else -it.amount
         }
 
-        val accountDistribution = accounts.groupBy { it.type }
-            .mapValues { entry -> entry.value.sumOf { it.balance } }
-            
-        val portfolioDistribution = latestHoldings.groupBy { it.category }
-            .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
-            
-        val distribution = accountDistribution.toMutableMap()
-        portfolioDistribution.forEach { (cat, value) ->
-            distribution[cat] = (distribution[cat] ?: 0L) + value
-        }
+        val distribution = when (selectedTab) {
+            WealthDistributionTab.CURRENCY -> {
+                latestHoldings.groupBy { it.currency }
+                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+            }
+            WealthDistributionTab.ASSET_CLASS -> {
+                latestHoldings.groupBy { it.assetClass }
+                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+            }
+            WealthDistributionTab.CATEGORY -> {
+                latestHoldings.groupBy { it.category }
+                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+            }
+        }.toList()
+            .sortedByDescending { kotlin.math.abs(it.second) }
+            .toMap()
 
         // Compute this-month cash flow
         val cal = CalendarUtils.getInstance()
@@ -119,25 +131,22 @@ class DashboardViewModel @Inject constructor(
 
         val suggestions = mutableListOf<String>()
         if (recurringNet < 0) suggestions.add("Your recurring expenses exceed your recurring income. Consider reviewing subscriptions.")
-        if (liabilities > assets * 0.5) suggestions.add("Your debt-to-asset ratio is high. Prioritize paying off high-interest debt.")
         if (assets > 0 && goals.isEmpty()) suggestions.add("You have healthy assets but no active goals. Why not set a new savings target?")
         if (monthlyIncome > 0 && savingsRate < 0.1f) suggestions.add("You're saving less than 10% of your income this month. Try to reduce discretionary spending.")
         if (monthlyExpense > monthlyIncome && monthlyIncome > 0) suggestions.add("⚠️ You're spending more than you earn this month. Review your expenses.")
 
-        // 30-day trend
+        // 30-day trend based on portfolio snapshots
         val now = System.currentTimeMillis()
-        val thirtyDaysAgo = now - (30L * 24 * 60 * 60 * 1000)
-        val trendTxns = transactions.filter { it.date >= thirtyDaysAgo }
         val trend = mutableListOf<Long>()
-        var runningNW = assets - liabilities
-        trend.add(runningNW)
-        for (i in 1..29) {
+        
+        for (i in 0..29) {
             val dayStart = now - (i.toLong() * 24 * 60 * 60 * 1000)
-            val dayEnd = now - ((i - 1).toLong() * 24 * 60 * 60 * 1000)
-            val dayNet = trendTxns.filter { it.date >= dayStart && it.date < dayEnd }
-                .sumOf { if (it.type == "INCOME") it.amount else -it.amount }
-            runningNW -= dayNet
-            trend.add(runningNW)
+            // Find the latest snapshot that was available on this day
+            val snapshotAtDay = portfolioHistory.filter { it.snapshot_date <= dayStart }
+                .maxByOrNull { it.snapshot_date }
+            
+            val dayValue = ((snapshotAtDay?.totalIdr ?: 0.0) * 100).toLong()
+            trend.add(dayValue)
         }
 
         val todayCal = CalendarUtils.getInstance()
@@ -149,7 +158,7 @@ class DashboardViewModel @Inject constructor(
             totalLiabilities = liabilities,
             upcomingBills = recurring.take(3),
             goals = goals.take(2),
-            projectedBalance30Days = (assets - liabilities) + recurringNet,
+            projectedBalance30Days = assets - liabilities,
             wealthDistribution = distribution,
             aiSuggestions = suggestions,
             isLoading = false,
@@ -161,7 +170,8 @@ class DashboardViewModel @Inject constructor(
             currentCurrency = localeManager.getCurrency(),
             last30DaysTrend = trend.reversed(),
             daysLeftInMonth = daysLeft,
-            isPrivacyModeEnabled = privacyMode
+            isPrivacyModeEnabled = privacyMode,
+            wealthDistributionTab = selectedTab
         )
     }.stateIn(
         scope = viewModelScope,
@@ -171,5 +181,9 @@ class DashboardViewModel @Inject constructor(
     
     fun togglePrivacyMode() {
         localeManager.setPrivacyModeEnabled(!localeManager.isPrivacyModeEnabled())
+    }
+
+    fun setWealthDistributionTab(tab: WealthDistributionTab) {
+        _wealthDistributionTab.value = tab
     }
 }

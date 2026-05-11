@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
         PortfolioSnapshotHeaderEntity::class,
         PortfolioHoldingEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -377,6 +377,12 @@ abstract class AppDatabase : RoomDatabase() {
 
                 // 4. Drop old table
                 db.execSQL("DROP TABLE portfolio_snapshots")
+            }
+        }
+
+        val MIGRATION_17_18 = object : androidx.room.migration.Migration(17, 18) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE portfolio_holdings ADD COLUMN asset_class TEXT NOT NULL DEFAULT 'Other'")
             }
         }
     }
