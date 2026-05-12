@@ -119,12 +119,6 @@ fun ExpenseListScreen(
                     IconButton(onClick = onStatsClick) {
                         Icon(Icons.Default.QueryStats, contentDescription = "Transaction Statistics")
                     }
-                    IconButton(onClick = onInstallmentsClick) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ReceiptLong,
-                            contentDescription = "Active Installments"
-                        )
-                    }
                     IconButton(onClick = onRecurringExpensesClick) {
                         Icon(
                             Icons.Default.Sync,

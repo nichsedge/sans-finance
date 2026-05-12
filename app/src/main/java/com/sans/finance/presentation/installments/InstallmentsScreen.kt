@@ -51,22 +51,61 @@ import com.sans.finance.domain.model.Installment
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstallmentsScreen(
     onBack: () -> Unit,
+    onRecurringExpensesClick: () -> Unit,
     viewModel: InstallmentsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var showViewMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        stringResource(R.string.active_installments),
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { showViewMenu = true }
+                    ) {
+                        Text(
+                            stringResource(R.string.active_installments),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Switch View",
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        DropdownMenu(
+                            expanded = showViewMenu,
+                            onDismissRequest = { showViewMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.recurring_expenses)) },
+                                onClick = {
+                                    showViewMenu = false
+                                    onRecurringExpensesClick()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Sync, contentDescription = null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.active_installments)) },
+                                onClick = { showViewMenu = false },
+                                leadingIcon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = null) }
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
