@@ -15,6 +15,7 @@ import com.sans.finance.presentation.expense_list.ExpenseListScreen
 import com.sans.finance.presentation.goals.GoalScreen
 import com.sans.finance.presentation.main.MainScreen
 import com.sans.finance.presentation.navigation.Screen
+import com.sans.finance.presentation.search.SearchScreen
 import com.sans.finance.presentation.settings.SettingsScreen
 import com.sans.finance.ui.theme.SansFinanceTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -89,6 +90,9 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                 onRecurringExpensesClick = {
                     navController.navigate(Screen.RecurringExpenses)
                 },
+                onSearchClick = {
+                    navController.navigate(Screen.Search)
+                },
                 onExpenseClick = { id ->
                     navController.navigate(Screen.EditExpense(id))
                 }
@@ -96,6 +100,15 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
         }
         composable<Screen.AddTransaction> {
             AddTransactionScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<Screen.Search> {
+            SearchScreen(
+                onBack = { navController.popBackStack() },
+                onExpenseClick = { id ->
+                    navController.navigate(Screen.EditExpense(id))
+                }
+            )
         }
 
         composable<Screen.EditExpense> {

@@ -56,6 +56,8 @@
     <string name="select_date_range">Select Date Range</string>
     <string name="no_data_available">No data available for this period</string>
     <string name="transactions">Transactions</string>
+    <string name="today">Today</string>
+    <string name="upcoming">Upcoming</string>
 
 
 </resources>

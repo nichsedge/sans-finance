@@ -49,6 +49,7 @@ class ExpenseRepositoryImpl(
     override fun getFilteredExpenses(
         query: String?,
         categoryIds: List<Long>,
+        accountIds: List<Long>,
         since: Long,
         until: Long,
         minAmount: Long?,
@@ -62,6 +63,8 @@ class ExpenseRepositoryImpl(
             searchQuery,
             categoryIds,
             categoryIds.size,
+            accountIds,
+            accountIds.size,
             since,
             until,
             minAmount,
@@ -84,11 +87,13 @@ class ExpenseRepositoryImpl(
                         searchQuery == null || payment.note.contains(searchQuery, ignoreCase = true)
                     val matchesCategory =
                         categoryIds.isEmpty() || categoryIds.contains(payment.categoryId)
+                    val matchesAccount =
+                        accountIds.isEmpty() || accountIds.contains(payment.accountId)
                     val matchesMinAmount = minAmount == null || payment.amount >= minAmount
                     val matchesMaxAmount = maxAmount == null || payment.amount <= maxAmount
                     val matchesTags = tags.isEmpty() || payment.tags.any { tags.contains(it) }
                     val matchesType = types.isEmpty() || types.contains(payment.type)
-                    matchesQuery && matchesCategory && matchesMinAmount && matchesMaxAmount && matchesTags && matchesType
+                    matchesQuery && matchesCategory && matchesAccount && matchesMinAmount && matchesMaxAmount && matchesTags && matchesType
                 }
 
             (expenses + installmentPayments).sortedByDescending { it.date }

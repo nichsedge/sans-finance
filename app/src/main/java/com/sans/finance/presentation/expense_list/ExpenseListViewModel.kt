@@ -24,9 +24,10 @@ import java.util.Calendar
 import javax.inject.Inject
 
 enum class DateRangeFilter {
-    SEVEN_DAYS,
-    THIRTY_DAYS,
+    THIS_WEEK,
     THIS_MONTH,
+    LAST_MONTH,
+    THIS_YEAR,
     ALL_TIME,
     CUSTOM
 }
@@ -49,6 +50,7 @@ data class ExpenseListState(
     val selectedTags: Set<String> = emptySet(),
     val searchQuery: String = "",
     val selectedCategoryIds: Set<Long> = emptySet(),
+    val selectedAccountIds: Set<Long> = emptySet(),
     val minAmount: Long? = null,
     val maxAmount: Long? = null,
     val dailySpending: Map<Long, Long> = emptyMap(),
@@ -140,6 +142,7 @@ class ExpenseListViewModel @Inject constructor(
                     it.endDate,
                     it.searchQuery,
                     it.selectedCategoryIds,
+                    it.selectedAccountIds,
                     it.minAmount,
                     it.maxAmount,
                     it.selectedTags,
@@ -152,6 +155,7 @@ class ExpenseListViewModel @Inject constructor(
                 val expensesFlow = repository.getFilteredExpenses(
                     query = s.searchQuery,
                     categoryIds = s.selectedCategoryIds.toList(),
+                    accountIds = s.selectedAccountIds.toList(),
                     since = s.startDate,
                     until = s.endDate,
                     minAmount = s.minAmount,
@@ -215,6 +219,18 @@ class ExpenseListViewModel @Inject constructor(
         }
     }
 
+    fun toggleAccountFilter(accountId: Long) {
+        _state.update { currentState ->
+            val newSelectedAccountIds =
+                if (currentState.selectedAccountIds.contains(accountId)) {
+                    currentState.selectedAccountIds - accountId
+                } else {
+                    currentState.selectedAccountIds + accountId
+                }
+            currentState.copy(selectedAccountIds = newSelectedAccountIds)
+        }
+    }
+
     fun updateAmountFilter(min: Long?, max: Long?) {
         _state.update { it.copy(minAmount = min, maxAmount = max) }
     }
@@ -236,6 +252,7 @@ class ExpenseListViewModel @Inject constructor(
             currentState.copy(
                 searchQuery = "",
                 selectedCategoryIds = emptySet(),
+                selectedAccountIds = emptySet(),
                 minAmount = null,
                 maxAmount = null,
                 selectedTags = emptySet(),
@@ -327,25 +344,10 @@ class ExpenseListViewModel @Inject constructor(
 
 
         val (start, end) = when (filter) {
-            DateRangeFilter.SEVEN_DAYS -> {
-                calendar.add(Calendar.DAY_OF_YEAR, -7)
-                val endCal = CalendarUtils.getInstance()
-                endCal.add(Calendar.DAY_OF_YEAR, 1)
-                endCal.set(Calendar.HOUR_OF_DAY, 0)
-                endCal.set(Calendar.MINUTE, 0)
-                endCal.set(Calendar.SECOND, 0)
-                endCal.set(Calendar.MILLISECOND, 0)
-                Pair(calendar.timeInMillis, endCal.timeInMillis)
-            }
-
-            DateRangeFilter.THIRTY_DAYS -> {
-                calendar.add(Calendar.DAY_OF_YEAR, -30)
-                val endCal = CalendarUtils.getInstance()
-                endCal.add(Calendar.DAY_OF_YEAR, 1)
-                endCal.set(Calendar.HOUR_OF_DAY, 0)
-                endCal.set(Calendar.MINUTE, 0)
-                endCal.set(Calendar.SECOND, 0)
-                endCal.set(Calendar.MILLISECOND, 0)
+            DateRangeFilter.THIS_WEEK -> {
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+                val endCal = calendar.clone() as Calendar
+                endCal.add(Calendar.WEEK_OF_YEAR, 1)
                 Pair(calendar.timeInMillis, endCal.timeInMillis)
             }
 
@@ -353,6 +355,21 @@ class ExpenseListViewModel @Inject constructor(
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
                 val endCal = calendar.clone() as Calendar
                 endCal.add(Calendar.MONTH, 1)
+                Pair(calendar.timeInMillis, endCal.timeInMillis)
+            }
+
+            DateRangeFilter.LAST_MONTH -> {
+                calendar.add(Calendar.MONTH, -1)
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                val endCal = calendar.clone() as Calendar
+                endCal.add(Calendar.MONTH, 1)
+                Pair(calendar.timeInMillis, endCal.timeInMillis)
+            }
+
+            DateRangeFilter.THIS_YEAR -> {
+                calendar.set(Calendar.DAY_OF_YEAR, 1)
+                val endCal = calendar.clone() as Calendar
+                endCal.add(Calendar.YEAR, 1)
                 Pair(calendar.timeInMillis, endCal.timeInMillis)
             }
 
@@ -412,5 +429,57 @@ class ExpenseListViewModel @Inject constructor(
 
     fun togglePrivacyMode() {
         localeManager.setPrivacyModeEnabled(!localeManager.isPrivacyModeEnabled())
+    }
+
+    fun previousMonth() {
+        val calendar = CalendarUtils.getInstance()
+        calendar.timeInMillis = if (_state.value.startDate == 0L) System.currentTimeMillis() else _state.value.startDate
+        
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        
+        calendar.add(Calendar.MONTH, -1)
+        val start = calendar.timeInMillis
+        
+        calendar.add(Calendar.MONTH, 1)
+        val end = calendar.timeInMillis
+        
+        _state.update { 
+            it.copy(
+                startDate = start,
+                endDate = end,
+                activeDateFilter = DateRangeFilter.CUSTOM,
+                isLoading = true
+            )
+        }
+    }
+
+    fun nextMonth() {
+        val calendar = CalendarUtils.getInstance()
+        calendar.timeInMillis = if (_state.value.startDate == 0L) System.currentTimeMillis() else _state.value.startDate
+        
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        
+        calendar.add(Calendar.MONTH, 1)
+        val start = calendar.timeInMillis
+        
+        calendar.add(Calendar.MONTH, 1)
+        val end = calendar.timeInMillis
+        
+        _state.update { 
+            it.copy(
+                startDate = start,
+                endDate = end,
+                activeDateFilter = DateRangeFilter.CUSTOM,
+                isLoading = true
+            )
+        }
     }
 }

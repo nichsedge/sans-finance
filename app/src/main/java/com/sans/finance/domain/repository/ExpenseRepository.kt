@@ -10,6 +10,7 @@ interface ExpenseRepository {
     fun getFilteredExpenses(
         query: String? = null,
         categoryIds: List<Long> = emptyList(),
+        accountIds: List<Long> = emptyList(),
         since: Long = 0L,
         until: Long = Long.MAX_VALUE,
         minAmount: Long? = null,
