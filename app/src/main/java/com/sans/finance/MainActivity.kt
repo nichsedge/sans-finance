@@ -99,7 +99,8 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
         }
         composable<Screen.Installments> {
             com.sans.finance.presentation.installments.InstallmentsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onRecurringExpensesClick = { navController.navigate(Screen.RecurringExpenses) }
             )
         }
         composable<Screen.TransactionStats> {
@@ -121,7 +122,8 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
         composable<Screen.RecurringExpenses> {
             com.sans.finance.presentation.recurring.RecurringExpensesScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onExpenseClick = { id -> navController.navigate(Screen.EditExpense(id)) }
+                onExpenseClick = { id -> navController.navigate(Screen.EditExpense(id)) },
+                onInstallmentsClick = { navController.navigate(Screen.Installments) }
             )
         }
         composable<Screen.Accounts> {
