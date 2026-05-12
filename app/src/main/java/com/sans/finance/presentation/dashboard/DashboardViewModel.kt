@@ -45,7 +45,8 @@ data class DashboardState(
     val financialFreedomYears: Double = 0.0,
     val financialFreedomScore: Float = 0f,
     val isFireManualEnabled: Boolean = false,
-    val manualFireAnnualExpense: Long = 0L
+    val manualFireAnnualExpense: Long = 0L,
+    val recentTransactions: List<com.sans.finance.domain.model.Expense> = emptyList()
 )
 
 enum class WealthDistributionTab {
@@ -59,7 +60,9 @@ class DashboardViewModel @Inject constructor(
     private val goalRepository: GoalRepository,
     private val budgetRepository: BudgetRepository,
     private val portfolioRepository: PortfolioRepository,
-    private val localeManager: com.sans.finance.data.util.LocaleManager
+    private val localeManager: com.sans.finance.data.util.LocaleManager,
+    private val currencyDao: com.sans.finance.data.local.dao.CurrencyDao,
+    private val detectRecurringPatternsUseCase: com.sans.finance.domain.usecase.DetectRecurringPatternsUseCase
 ) : ViewModel() {
 
     private val _wealthDistributionTab =
@@ -70,9 +73,11 @@ class DashboardViewModel @Inject constructor(
         expenseRepository.getExpensesBetween(0, Long.MAX_VALUE),
         expenseRepository.getRecurringExpenses(),
         budgetRepository.getAllBudgets(),
-        goalRepository.getAllGoals()
-    ) { txns, recurring, budgets, goals ->
-        FinanceContext(txns, recurring, budgets, goals)
+        goalRepository.getAllGoals(),
+        currencyDao.getAllRates()
+    ) { txns, recurring, budgets, goals, rates ->
+        val ratesMap = rates.associate { it.code to it.rateToIdr }
+        FinanceContext(txns, recurring, budgets, goals, ratesMap)
     }
 
     private val portfolioContext = combine(
@@ -91,15 +96,21 @@ class DashboardViewModel @Inject constructor(
         SettingsContext(privacy, tab, fireManual, fireAmount)
     }
 
+    private val aiContext = kotlinx.coroutines.flow.flow {
+        emit(detectRecurringPatternsUseCase())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val state = combine(
         financeContext,
         portfolioContext,
-        settingsContext
-    ) { finance, portfolio, settings ->
+        settingsContext,
+        aiContext
+    ) { finance, portfolio, settings, patterns ->
         val transactions = finance.transactions
         val recurring = finance.recurring
         val goals = finance.goals
         val budgets = finance.budgets
+        val rates = finance.rates
 
         val portfolioHistory = portfolio.history
         val latestHoldings = portfolio.holdings
@@ -108,31 +119,52 @@ class DashboardViewModel @Inject constructor(
         val selectedTab = settings.wealthDistributionTab
         val isFireManual = settings.isFireManualEnabled
         val manualFireExpense = settings.manualFireAnnualExpense
+        val baseCurrency = localeManager.getCurrency()
+
+        fun convertToBase(amount: Long, from: String): Long {
+            if (from == baseCurrency) return amount
+            val fromRate = if (from == "IDR") 1.0 else rates[from] ?: 1.0
+            val toRate = if (baseCurrency == "IDR") 1.0 else rates[baseCurrency] ?: 1.0
+            if (toRate == 0.0) return amount
+            return ((amount * fromRate) / toRate).toLong()
+        }
 
         val latestPortfolioIdr = portfolioHistory.lastOrNull()?.totalIdr ?: 0.0
-        val portfolioAssets = (latestPortfolioIdr * 100).toLong()
+        // portfolioAssets in base currency
+        val baseRate = if (baseCurrency == "IDR") 1.0 else rates[baseCurrency] ?: 1.0
+        val portfolioAssets = if (baseRate > 0) ((latestPortfolioIdr / baseRate) * 100).toLong() else (latestPortfolioIdr * 100).toLong()
 
         val assets = portfolioAssets
         val liabilities = 0L
 
         val recurringNet = recurring.sumOf {
-            if (it.type == "INCOME") it.amount else -it.amount
+            val amt = convertToBase(it.amount, it.currency)
+            if (it.type == "INCOME") amt else -amt
         }
 
         val distribution = when (selectedTab) {
             WealthDistributionTab.CURRENCY -> {
                 latestHoldings.groupBy { it.currency }
-                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+                    .mapValues { entry -> 
+                        val idrValue = entry.value.sumOf { it.valueIdr }
+                        if (baseRate > 0) ((idrValue / baseRate) * 100).toLong() else (idrValue * 100).toLong()
+                    }
             }
 
             WealthDistributionTab.ASSET_CLASS -> {
                 latestHoldings.groupBy { it.assetClass }
-                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+                    .mapValues { entry -> 
+                        val idrValue = entry.value.sumOf { it.valueIdr }
+                        if (baseRate > 0) ((idrValue / baseRate) * 100).toLong() else (idrValue * 100).toLong()
+                    }
             }
 
             WealthDistributionTab.CATEGORY -> {
                 latestHoldings.groupBy { it.category }
-                    .mapValues { entry -> (entry.value.sumOf { it.valueIdr } * 100).toLong() }
+                    .mapValues { entry -> 
+                        val idrValue = entry.value.sumOf { it.valueIdr }
+                        if (baseRate > 0) ((idrValue / baseRate) * 100).toLong() else (idrValue * 100).toLong()
+                    }
             }
         }.toList()
             .sortedByDescending { kotlin.math.abs(it.second) }
@@ -151,8 +183,8 @@ class DashboardViewModel @Inject constructor(
         val monthlyTxns = transactions.filter {
             it.date >= monthStart && it.date < nextMonthStart && (!it.isInstallment || it.isInstallmentPayment)
         }
-        val monthlyIncome = monthlyTxns.filter { it.type == "INCOME" }.sumOf { it.amount }
-        val monthlyExpense = monthlyTxns.filter { it.type == "EXPENSE" }.sumOf { it.amount }
+        val monthlyIncome = monthlyTxns.filter { it.type == "INCOME" }.sumOf { convertToBase(it.amount, it.currency) }
+        val monthlyExpense = monthlyTxns.filter { it.type == "EXPENSE" }.sumOf { convertToBase(it.amount, it.currency) }
         val savingsRate =
             if (monthlyIncome > 0) ((monthlyIncome - monthlyExpense).toFloat() / monthlyIncome.toFloat()).coerceIn(
                 0f,
@@ -164,7 +196,7 @@ class DashboardViewModel @Inject constructor(
         val yearAgo = now - (365L * 24 * 60 * 60 * 1000)
         val annualExpense = transactions.filter {
             it.date >= yearAgo && it.date <= now && it.type == "EXPENSE" && (!it.isInstallment || it.isInstallmentPayment)
-        }.sumOf { it.amount }
+        }.sumOf { convertToBase(it.amount, it.currency) }
 
         val firstTxnDate =
             transactions.filter { it.type == "EXPENSE" }.minOfOrNull { it.date } ?: now
@@ -200,6 +232,10 @@ class DashboardViewModel @Inject constructor(
         if (monthlyIncome > 0 && savingsRate < 0.1f) suggestions.add("You're saving less than 10% of your income this month. Try to reduce discretionary spending.")
         if (monthlyExpense > monthlyIncome && monthlyIncome > 0) suggestions.add("⚠️ You're spending more than you earn this month. Review your expenses.")
 
+        patterns.forEach { pattern ->
+            suggestions.add("💡 \"${pattern.note}\" looks like a recurring expense. Why not set it up as a subscription?")
+        }
+
         if (daysOfData < 30 && annualExpense > 0) {
             suggestions.add("💡 Tracking more expenses will improve the accuracy of your Financial Freedom score.")
         } else if (annualExpense == 0L && assets > 0) {
@@ -211,7 +247,8 @@ class DashboardViewModel @Inject constructor(
             val dayStart = now - (i.toLong() * 24 * 60 * 60 * 1000)
             val snapshotAtDay = portfolioHistory.filter { it.snapshot_date <= dayStart }
                 .maxByOrNull { it.snapshot_date }
-            val dayValue = ((snapshotAtDay?.totalIdr ?: 0.0) * 100).toLong()
+            val dayValueIdr = snapshotAtDay?.totalIdr ?: 0.0
+            val dayValue = if (baseRate > 0) ((dayValueIdr / baseRate) * 100).toLong() else (dayValueIdr * 100).toLong()
             trend.add(dayValue)
         }
 
@@ -258,7 +295,8 @@ class DashboardViewModel @Inject constructor(
             financialFreedomYears = freedomYears,
             financialFreedomScore = freedomScore,
             isFireManualEnabled = isFireManual,
-            manualFireAnnualExpense = manualFireExpense
+            manualFireAnnualExpense = manualFireExpense,
+            recentTransactions = transactions.sortedByDescending { it.date }.take(5)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -288,7 +326,8 @@ private data class FinanceContext(
     val transactions: List<com.sans.finance.domain.model.Expense>,
     val recurring: List<com.sans.finance.domain.model.Expense>,
     val budgets: List<com.sans.finance.data.local.entity.BudgetEntity>,
-    val goals: List<com.sans.finance.data.local.entity.GoalEntity>
+    val goals: List<com.sans.finance.data.local.entity.GoalEntity>,
+    val rates: Map<String, Double>
 )
 
 private data class PortfolioContext(

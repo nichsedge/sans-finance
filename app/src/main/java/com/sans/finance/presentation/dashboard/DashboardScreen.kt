@@ -281,8 +281,28 @@ fun DashboardScreen(
                     }
                 }
             }
+            if (state.recentTransactions.isNotEmpty()) {
+                item {
+                    Text(
+                        "RECENT TRANSACTIONS",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        letterSpacing = 1.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    state.recentTransactions.forEach { transaction ->
+                        RecentTransactionItem(
+                            transaction = transaction,
+                            currencyCode = state.currentCurrency,
+                            isPrivacyModeEnabled = state.isPrivacyModeEnabled,
+                            onClick = { onTransactionClick(transaction.id) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
 
-
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -1216,6 +1236,81 @@ fun FinancialFreedomCard(
                         .clip(androidx.compose.foundation.shape.CircleShape),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+        }
+    }
+}
+@Composable
+fun RecentTransactionItem(
+    transaction: com.sans.finance.domain.model.Expense,
+    currencyCode: String,
+    isPrivacyModeEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        if (transaction.type == "INCOME") Color(0xFFE8F5E9) else Color(0xFFFBE9E7),
+                        androidx.compose.foundation.shape.CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (transaction.type == "INCOME") Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = null,
+                    tint = if (transaction.type == "INCOME") Color(0xFF4CAF50) else Color(0xFFF44336),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = transaction.description ?: "No description",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                PrivacyText(
+                    amount = transaction.amount,
+                    currencyCode = transaction.currency,
+                    isVisible = !isPrivacyModeEnabled,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (transaction.type == "INCOME") Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = com.sans.finance.core.util.DateFormatterUtils.getStandardFormatter()
+                        .format(java.util.Date(transaction.date)),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

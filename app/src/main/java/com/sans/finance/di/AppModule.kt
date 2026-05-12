@@ -40,7 +40,10 @@ object AppModule {
                 AppDatabase.MIGRATION_15_16,
                 AppDatabase.MIGRATION_16_17,
                 AppDatabase.MIGRATION_17_18,
-                AppDatabase.MIGRATION_18_19
+                AppDatabase.MIGRATION_18_19,
+                AppDatabase.MIGRATION_19_20,
+                AppDatabase.MIGRATION_20_21,
+                AppDatabase.MIGRATION_21_22
             )
             .build()
     }
@@ -96,6 +99,11 @@ object AppModule {
     @Singleton
     fun providePortfolioDao(db: AppDatabase): com.sans.finance.data.local.dao.PortfolioDao =
         db.portfolioDao
+
+    @Provides
+    @Singleton
+    fun provideCurrencyDao(db: AppDatabase): com.sans.finance.data.local.dao.CurrencyDao =
+        db.currencyDao
 
     @Provides
     @Singleton

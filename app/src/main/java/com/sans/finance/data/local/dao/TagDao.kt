@@ -28,4 +28,7 @@ interface TagDao {
 
     @Delete
     suspend fun deleteTag(tag: TagEntity)
+
+    @Query("DELETE FROM tags WHERE id NOT IN (SELECT DISTINCT tagId FROM expense_tag_ref)")
+    suspend fun deleteOrphanedTags()
 }

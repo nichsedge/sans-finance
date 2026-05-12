@@ -5,6 +5,7 @@ import com.sans.finance.domain.repository.ExpenseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import androidx.room.withTransaction
 
 class ExpenseRepositoryImpl(
@@ -135,8 +136,20 @@ class ExpenseRepositoryImpl(
         return dao.getNoteSuggestions(query)
     }
 
+    override suspend fun getTopFrequentNotes(limit: Int): List<String> {
+        return dao.getTopFrequentNotes(limit)
+    }
+
+    override suspend fun getTopFrequentNotesByDay(dayOfWeek: Int, limit: Int): List<String> {
+        return dao.getTopFrequentNotesByDay(dayOfWeek.toString(), limit)
+    }
+
     override suspend fun getDescriptionSuggestions(query: String): List<String> {
         return dao.getDescriptionSuggestions(query)
+    }
+    
+    override suspend fun getPredictionForNote(note: String): Expense? {
+        return dao.getLastExpenseByNote(note)?.toDomain()
     }
 
     override suspend fun findPotentialDuplicate(note: String, amount: Long, date: Long, accountId: Long): Expense? {
@@ -368,6 +381,52 @@ class ExpenseRepositoryImpl(
         tagDao.deleteTag(tag.toEntity())
     }
 
+    override suspend fun performDatabaseMaintenance() {
+        db.withTransaction {
+            tagDao.deleteOrphanedTags()
+
+            // Balance re-sync
+            val accounts = accountDao.getAllAccounts().first()
+            val balances = mutableMapOf<Long, Long>()
+            accounts.forEach { balances[it.id] = 0L }
+
+            val expenses = dao.getAllExpenseEntities()
+            expenses.forEach { exp ->
+                if (exp.type == "TRANSFER") {
+                    balances[exp.accountId] = (balances[exp.accountId] ?: 0L) - exp.finalPrice
+                    if (exp.toAccountId != null) {
+                        balances[exp.toAccountId] = (balances[exp.toAccountId] ?: 0L) + exp.finalPrice
+                    }
+                } else if (exp.type == "INCOME") {
+                    balances[exp.accountId] = (balances[exp.accountId] ?: 0L) + exp.finalPrice
+                } else {
+                    balances[exp.accountId] = (balances[exp.accountId] ?: 0L) - exp.finalPrice
+                }
+            }
+
+            // Add installment payments
+            val installmentItems =
+                installmentDao.getInstallmentPaymentsBetween(0, Long.MAX_VALUE).first()
+            installmentItems.forEach { item ->
+                if (item.status == "Paid") {
+                    balances[item.accountId] = (balances[item.accountId] ?: 0L) - item.amount
+                }
+            }
+
+            accounts.forEach { account ->
+                val newBalance = balances[account.id] ?: 0L
+                if (account.balance != newBalance) {
+                    accountDao.updateAccount(
+                        account.copy(
+                            balance = newBalance,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     override fun getSpendingByCategoryBetween(
         since: Long,
         until: Long
@@ -466,7 +525,6 @@ class ExpenseRepositoryImpl(
             toAccountId = toAccountId,
             type = type,
             description = description,
-            platform = tags.firstOrNull(), // Keep for legacy if needed, or null
             quantity = quantity,
             currency = currency,
             status = "completed"

@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package com.sans.finance.presentation.add_transaction
 
 import androidx.compose.runtime.getValue
@@ -48,6 +46,8 @@ class AddTransactionViewModel @Inject constructor(
     private val expenseRepository: com.sans.finance.domain.repository.ExpenseRepository,
     private val accountRepository: com.sans.finance.domain.repository.AccountRepository,
     private val checkDuplicateExpenseUseCase: CheckDuplicateExpenseUseCase,
+    private val predictTransactionUseCase: com.sans.finance.domain.usecase.PredictTransactionUseCase,
+    private val getFrequencyBasedSuggestionsUseCase: com.sans.finance.domain.usecase.GetFrequencyBasedSuggestionsUseCase,
     private val localeManager: com.sans.finance.data.util.LocaleManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -161,6 +161,8 @@ class AddTransactionViewModel @Inject constructor(
             .onEach { query ->
                 if (query.length >= 2) {
                     noteSuggestions = getItemNameSuggestionsUseCase(query)
+                } else if (query.isEmpty()) {
+                    noteSuggestions = getFrequencyBasedSuggestionsUseCase()
                 } else {
                     noteSuggestions = emptyList()
                 }
@@ -220,6 +222,17 @@ class AddTransactionViewModel @Inject constructor(
 
     fun onStatusChange(newStatus: String) {
         status = newStatus
+    }
+
+    fun applyPrediction(note: String) {
+        viewModelScope.launch {
+            predictTransactionUseCase(note)?.let { prediction ->
+                categoryId = prediction.categoryId
+                accountId = prediction.accountId
+                transactionType = prediction.type
+                selectedTags = prediction.tags
+            }
+        }
     }
 
     fun onSaveClick(onSuccess: () -> Unit) {

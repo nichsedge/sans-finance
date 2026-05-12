@@ -32,12 +32,14 @@ import kotlinx.coroutines.launch
         ExpenseTagCrossRef::class,
         AccountEntity::class,
         NetWorthSnapshotEntity::class,
-        GoalEntity::class,
-        BudgetEntity::class,
         PortfolioSnapshotHeaderEntity::class,
-        PortfolioHoldingEntity::class
+        PortfolioHoldingEntity::class,
+        com.sans.finance.data.local.entity.ExpenseFtsEntity::class,
+        com.sans.finance.data.local.entity.ExchangeRateEntity::class,
+        GoalEntity::class,
+        BudgetEntity::class
     ],
-    version = 19,
+    version = 22,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,6 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val accountDao: com.sans.finance.data.local.dao.AccountDao
     abstract val goalDao: com.sans.finance.data.local.dao.GoalDao
     abstract val budgetDao: com.sans.finance.data.local.dao.BudgetDao
+    abstract val currencyDao: com.sans.finance.data.local.dao.CurrencyDao
     abstract val portfolioDao: com.sans.finance.data.local.dao.PortfolioDao
 
     fun checkpoint() {
@@ -311,6 +314,24 @@ abstract class AppDatabase : RoomDatabase() {
 
                 // 4. Drop old table
                 db.execSQL("DROP TABLE goals_old")
+            }
+        }
+        val MIGRATION_19_20 = object : androidx.room.migration.Migration(19, 20) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE expenses DROP COLUMN platform")
+            }
+        }
+
+        val MIGRATION_20_21 = object : androidx.room.migration.Migration(20, 21) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS expenses_fts USING fts4(content=\"expenses\", note, description)")
+                db.execSQL("INSERT INTO expenses_fts(rowid, note, description) SELECT id, note, description FROM expenses")
+            }
+        }
+
+        val MIGRATION_21_22 = object : androidx.room.migration.Migration(21, 22) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS exchange_rates (code TEXT PRIMARY KEY NOT NULL, rateToIdr REAL NOT NULL, updatedAt INTEGER NOT NULL)")
             }
         }
     }

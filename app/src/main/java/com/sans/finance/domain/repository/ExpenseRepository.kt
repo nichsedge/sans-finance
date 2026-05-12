@@ -21,7 +21,10 @@ interface ExpenseRepository {
 
     suspend fun getExpenseById(id: Long): Expense?
     suspend fun getNoteSuggestions(query: String): List<String>
+    suspend fun getTopFrequentNotes(limit: Int): List<String>
+    suspend fun getTopFrequentNotesByDay(dayOfWeek: Int, limit: Int): List<String>
     suspend fun getDescriptionSuggestions(query: String): List<String>
+    suspend fun getPredictionForNote(note: String): Expense?
     suspend fun findPotentialDuplicate(note: String, amount: Long, date: Long, accountId: Long): Expense?
     suspend fun insertExpense(expense: Expense): Long
     suspend fun updateExpense(expense: Expense)
@@ -78,4 +81,6 @@ interface ExpenseRepository {
         categoryId: Long,
         type: String
     ): Flow<List<DaySpent>>
+
+    suspend fun performDatabaseMaintenance()
 }
