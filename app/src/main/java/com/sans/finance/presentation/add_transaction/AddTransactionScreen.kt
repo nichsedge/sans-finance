@@ -450,6 +450,7 @@ fun AddTransactionScreen(
                             onClick = {
                                 viewModel.note = suggestion
                                 noteExpanded = false
+                                viewModel.applyPrediction(suggestion)
                             }
                         )
                     }

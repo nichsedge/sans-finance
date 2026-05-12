@@ -207,6 +207,7 @@ fun SearchScreen(
                                 categoryIcon = category?.icon ?: (if (expense.isInstallmentPayment) "💳" else "📁"),
                                 accountName = account?.name,
                                 isPrivacyModeEnabled = state.isPrivacyModeEnabled,
+                                searchQuery = state.searchQuery,
                                 onClick = { onExpenseClick(expense.id) },
                                 onLongClick = {
                                     expenseToDelete = expense

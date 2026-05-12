@@ -8,7 +8,6 @@ import androidx.room.PrimaryKey
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val date: Long, // timestamp
-    val platform: String?,
     @ColumnInfo(name = "description") val description: String?,
     @ColumnInfo(name = "note") val note: String,
     val quantity: Int,

@@ -46,7 +46,8 @@ data class TransactionStatsState(
 @HiltViewModel
 class TransactionStatsViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository,
-    private val localeManager: com.sans.finance.data.util.LocaleManager
+    private val localeManager: com.sans.finance.data.util.LocaleManager,
+    private val currencyDao: com.sans.finance.data.local.dao.CurrencyDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TransactionStatsState())
@@ -151,15 +152,25 @@ class TransactionStatsViewModel @Inject constructor(
             breakdownFlow,
             incomeTotalFlow,
             expenseTotalFlow,
-            categoryDetailsFlow
-        ) { breakdown, income, expense, details ->
+            categoryDetailsFlow,
+            currencyDao.getAllRates()
+        ) { breakdown, income, expense, details, rates ->
+            val ratesMap = rates.associate { it.code to it.rateToIdr }
+            val baseCurrency = localeManager.getCurrency()
+            val baseRate = if (baseCurrency == "IDR") 1.0 else ratesMap[baseCurrency] ?: 1.0
+
+            fun convertFromIdr(amount: Long): Long {
+                if (baseRate == 0.0) return amount
+                return (amount / baseRate).toLong()
+            }
+
             _state.update {
                 it.copy(
-                    breakdown = breakdown,
-                    totalIncomeForPeriod = income ?: 0L,
-                    totalExpenseForPeriod = expense ?: 0L,
+                    breakdown = breakdown.map { b -> b.copy(totalAmount = convertFromIdr(b.totalAmount)) },
+                    totalIncomeForPeriod = convertFromIdr(income ?: 0L),
+                    totalExpenseForPeriod = convertFromIdr(expense ?: 0L),
                     categoryTransactions = details.first,
-                    categoryTrend = details.second,
+                    categoryTrend = details.second.map { d -> d.copy(amount = convertFromIdr(d.amount)) },
                     isLoading = false
                 )
             }

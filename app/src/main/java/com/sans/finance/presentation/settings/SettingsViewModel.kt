@@ -98,6 +98,20 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun performMaintenance() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                repository.performDatabaseMaintenance()
+                _syncMessage.value = "Maintenance completed successfully"
+            } catch (e: Exception) {
+                _error.value = "Maintenance failed: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 
     fun exportFullBackup(context: android.content.Context) {
         _isLoading.value = true
