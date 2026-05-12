@@ -35,6 +35,7 @@ interface ExpenseDao {
         LEFT JOIN tags t ON etr.tagId = t.id
         WHERE (:query IS NULL OR e.note LIKE '%' || :query || '%' OR e.description LIKE '%' || :query || '%')
         AND (:categoryCount = 0 OR e.category_id IN (:categoryIds))
+        AND (:accountCount = 0 OR e.account_id IN (:accountIds))
         AND (e.date >= :since AND e.date < :until)
         AND e.is_installment = 0
         AND (:minAmount IS NULL OR e.final_price >= :minAmount)
@@ -48,6 +49,8 @@ interface ExpenseDao {
         query: String?,
         categoryIds: List<Long>,
         categoryCount: Int,
+        accountIds: List<Long>,
+        accountCount: Int,
         since: Long,
         until: Long,
         minAmount: Long?,

@@ -57,4 +57,7 @@ sealed class Screen {
 
     @Serializable
     object WealthForecasting : Screen()
+
+    @Serializable
+    object Search : Screen()
 }

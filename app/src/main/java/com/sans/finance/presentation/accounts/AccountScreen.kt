@@ -22,12 +22,14 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -66,22 +68,40 @@ fun AccountScreen(
     val state by viewModel.state.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
     var accountToEdit by remember { mutableStateOf<AccountEntity?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Accounts", fontWeight = FontWeight.Bold) },
+                title = { Text("Accounts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold) },
                 actions = {
-                    IconButton(onClick = onStatsClick) {
-                        Icon(
-                            imageVector = Icons.Default.QueryStats,
-                            contentDescription = "Account Statistics"
-                        )
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "More options")
                     }
-                    IconButton(onClick = { viewModel.togglePrivacyMode() }) {
-                        Icon(
-                            imageVector = if (state.isPrivacyModeEnabled) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (state.isPrivacyModeEnabled) "Show balances" else "Hide balances"
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Account Statistics") },
+                            onClick = {
+                                showMenu = false
+                                onStatsClick()
+                            },
+                            leadingIcon = { Icon(Icons.Default.QueryStats, contentDescription = null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(if (state.isPrivacyModeEnabled) "Show balances" else "Hide balances") },
+                            onClick = {
+                                showMenu = false
+                                viewModel.togglePrivacyMode()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (state.isPrivacyModeEnabled) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = null
+                                )
+                            }
                         )
                     }
                 }

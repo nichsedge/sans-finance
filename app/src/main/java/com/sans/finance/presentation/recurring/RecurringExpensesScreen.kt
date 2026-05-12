@@ -1,6 +1,5 @@
 package com.sans.finance.presentation.recurring
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +14,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -33,9 +27,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,7 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sans.finance.R
 import com.sans.finance.core.util.CurrencyFormatter
 import com.sans.finance.domain.model.Expense
-import com.sans.finance.presentation.expense_list.ExpenseItem
+import com.sans.finance.presentation.components.ExpenseItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,55 +47,15 @@ fun RecurringExpensesScreen(
     viewModel: RecurringExpensesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var showViewMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { showViewMenu = true }
-                    ) {
-                        Text(
-                            stringResource(R.string.recurring_expenses),
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Switch View",
-                            modifier = Modifier.size(20.dp)
-                        )
-
-                        DropdownMenu(
-                            expanded = showViewMenu,
-                            onDismissRequest = { showViewMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.recurring_expenses)) },
-                                onClick = { showViewMenu = false },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Sync,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.active_installments)) },
-                                onClick = {
-                                    showViewMenu = false
-                                    onInstallmentsClick()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ReceiptLong,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                        }
-                    }
+                    Text(
+                        stringResource(R.string.recurring_expenses),
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -222,7 +173,8 @@ fun RecurringExpensesScreen(
 
                         ExpenseItem(
                             expense = expense,
-                            category = category,
+                            categoryName = category?.name,
+                            categoryIcon = category?.icon ?: "",
                             showNextDueDate = true,
                             overrideAmount = displayAmount,
                             overrideLabel = overrideLabel,

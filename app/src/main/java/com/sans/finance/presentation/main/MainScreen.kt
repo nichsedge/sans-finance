@@ -84,6 +84,9 @@ fun MainScreen(
                     onRecurringExpensesClick = {
                         rootNavController.navigate(Screen.RecurringExpenses)
                     },
+                    onSearchClick = {
+                        rootNavController.navigate(Screen.Search)
+                    },
                     onExpenseClick = { id ->
                         rootNavController.navigate(Screen.EditExpense(id))
                     }
@@ -168,7 +171,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 },
-                alwaysShowLabel = true,
+                alwaysShowLabel = false,
                 selected = isSelected,
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.tertiary,

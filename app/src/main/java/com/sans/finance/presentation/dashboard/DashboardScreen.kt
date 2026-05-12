@@ -91,7 +91,11 @@ fun DashboardScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { showViewMenu = true }
                     ) {
-                        Text("Dashboard", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Dashboard",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold
+                        )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = "Switch View",
