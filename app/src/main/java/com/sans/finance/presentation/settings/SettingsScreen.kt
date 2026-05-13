@@ -28,8 +28,7 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -447,11 +446,7 @@ fun SettingsContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            if (isPrivacyModeEnabled) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = null
-                        )
-                        Spacer(Modifier.width(16.dp))
+
                         Column {
                             Text("Privacy Mode", style = MaterialTheme.typography.bodyLarge)
                             Text(

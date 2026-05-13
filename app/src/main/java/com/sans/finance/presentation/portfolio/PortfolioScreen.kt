@@ -28,8 +28,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -148,12 +147,7 @@ fun PortfolioScreen(
                         }
                         if (state.snapshotDates.isNotEmpty()) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { viewModel.togglePrivacyMode() }) {
-                                    Icon(
-                                        imageVector = if (state.isPrivacyModeEnabled) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                        contentDescription = if (state.isPrivacyModeEnabled) "Show balances" else "Hide balances"
-                                    )
-                                }
+
                                 IconButton(onClick = viewModel::onPreviousSnapshot) {
                                     Icon(
                                         Icons.AutoMirrored.Filled.KeyboardArrowLeft,

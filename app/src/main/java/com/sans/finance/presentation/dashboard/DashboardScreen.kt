@@ -28,8 +28,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -133,14 +132,7 @@ fun DashboardScreen(
                         }
                     }
                 },
-                actions = {
-                    IconButton(onClick = { viewModel.togglePrivacyMode() }) {
-                        Icon(
-                            imageVector = if (state.isPrivacyModeEnabled) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = if (state.isPrivacyModeEnabled) "Show balances" else "Hide balances"
-                        )
-                    }
-                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)

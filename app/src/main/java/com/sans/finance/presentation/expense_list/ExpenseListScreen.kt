@@ -32,8 +32,7 @@ import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -185,19 +184,7 @@ fun ExpenseListScreen(
                             },
                             leadingIcon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = null) }
                         )
-                        DropdownMenuItem(
-                            text = { Text(if (state.isPrivacyModeEnabled) "Show balances" else "Hide balances") },
-                            onClick = {
-                                showMenu = false
-                                viewModel.togglePrivacyMode()
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = if (state.isPrivacyModeEnabled) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                    contentDescription = null
-                                )
-                            }
-                        )
+
                     }
                 }
             )
