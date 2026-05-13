@@ -811,7 +811,11 @@ fun DashboardBillItem(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Text("Recurring Payment", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    if (bill.isInstallmentPayment) "Installment ${bill.installmentMonth}/${bill.installmentTotalMonths}"
+                    else "Recurring Payment",
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
             PrivacyText(
                 amount = bill.amount,

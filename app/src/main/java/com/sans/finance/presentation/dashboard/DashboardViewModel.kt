@@ -61,8 +61,7 @@ class DashboardViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val portfolioRepository: PortfolioRepository,
     private val localeManager: com.sans.finance.data.util.LocaleManager,
-    private val currencyDao: com.sans.finance.data.local.dao.CurrencyDao,
-    private val detectRecurringPatternsUseCase: com.sans.finance.domain.usecase.DetectRecurringPatternsUseCase
+    private val currencyDao: com.sans.finance.data.local.dao.CurrencyDao
 ) : ViewModel() {
 
     private val _wealthDistributionTab =
@@ -96,16 +95,13 @@ class DashboardViewModel @Inject constructor(
         SettingsContext(privacy, tab, fireManual, fireAmount)
     }
 
-    private val aiContext = kotlinx.coroutines.flow.flow {
-        emit(detectRecurringPatternsUseCase())
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
 
     val state = combine(
         financeContext,
         portfolioContext,
-        settingsContext,
-        aiContext
-    ) { finance, portfolio, settings, patterns ->
+        settingsContext
+    ) { finance, portfolio, settings ->
         val transactions = finance.transactions
         val recurring = finance.recurring
         val goals = finance.goals
@@ -232,9 +228,7 @@ class DashboardViewModel @Inject constructor(
         if (monthlyIncome > 0 && savingsRate < 0.1f) suggestions.add("You're saving less than 10% of your income this month. Try to reduce discretionary spending.")
         if (monthlyExpense > monthlyIncome && monthlyIncome > 0) suggestions.add("⚠️ You're spending more than you earn this month. Review your expenses.")
 
-        patterns.forEach { pattern ->
-            suggestions.add("💡 \"${pattern.note}\" looks like a recurring expense. Why not set it up as a subscription?")
-        }
+
 
         if (daysOfData < 30 && annualExpense > 0) {
             suggestions.add("💡 Tracking more expenses will improve the accuracy of your Financial Freedom score.")
@@ -260,7 +254,9 @@ class DashboardViewModel @Inject constructor(
             netWorth = assets - liabilities,
             totalAssets = assets,
             totalLiabilities = liabilities,
-            upcomingBills = recurring.take(3),
+            upcomingBills = (recurring + transactions.filter { it.isInstallmentPayment && it.status == "Pending" && it.date >= now })
+                .sortedBy { if (it.isInstallmentPayment) it.date else it.nextDueDate ?: Long.MAX_VALUE }
+                .take(3),
             goals = goals.map { goal ->
                 val currentAmountIdr = when (goal.targetType) {
                     "TOTAL" -> latestPortfolioIdr
@@ -296,7 +292,7 @@ class DashboardViewModel @Inject constructor(
             financialFreedomScore = freedomScore,
             isFireManualEnabled = isFireManual,
             manualFireAnnualExpense = manualFireExpense,
-            recentTransactions = transactions.sortedByDescending { it.date }.take(5)
+            recentTransactions = transactions.filter { it.date <= now }.sortedByDescending { it.date }.take(5)
         )
     }.stateIn(
         scope = viewModelScope,
