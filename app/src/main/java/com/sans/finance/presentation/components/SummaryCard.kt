@@ -1,6 +1,8 @@
 package com.sans.finance.presentation.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,13 +23,13 @@ fun SummaryCard(
     avgMonthlyExpense: Long = 0L,
     isPrivacyModeEnabled: Boolean = false
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -41,22 +43,22 @@ fun SummaryCard(
                     label = "Income",
                     amount = income,
                     currencyCode = currencyCode,
-                    color = Color(0xFF4CAF50),
-                    isPrivacyModeEnabled = isPrivacyModeEnabled,
-                    modifier = Modifier.weight(1f)
-                )
-                
-                SummaryItem(
-                    label = "Expenses",
-                    amount = expense,
-                    currencyCode = currencyCode,
-                    color = Color(0xFFE53935),
+                    color = MaterialTheme.colorScheme.tertiary,
                     isPrivacyModeEnabled = isPrivacyModeEnabled,
                     modifier = Modifier.weight(1f)
                 )
 
                 SummaryItem(
-                    label = "Total",
+                    label = "Expenses",
+                    amount = expense,
+                    currencyCode = currencyCode,
+                    color = MaterialTheme.colorScheme.error,
+                    isPrivacyModeEnabled = isPrivacyModeEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+
+                SummaryItem(
+                    label = "Balance",
                     amount = total,
                     currencyCode = currencyCode,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -67,28 +69,28 @@ fun SummaryCard(
             }
 
             if (avgMonthlyExpense > 0) {
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    thickness = 0.5.dp
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), CircleShape)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Avg. Monthly Expense: ",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "AVG. MONTHLY SPENDING: ",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
                     )
                     PrivacyText(
                         amount = avgMonthlyExpense,
                         currencyCode = currencyCode,
                         isVisible = !isPrivacyModeEnabled,
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -112,19 +114,20 @@ private fun SummaryItem(
         horizontalAlignment = horizontalAlignment
     ) {
         Text(
-            text = label,
+            text = label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         PrivacyText(
             amount = amount,
             currencyCode = currencyCode,
             isVisible = !isPrivacyModeEnabled,
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp
+                fontWeight = FontWeight.Black,
+                fontSize = 15.sp
             ),
             color = color,
             modifier = Modifier.fillMaxWidth(),
@@ -138,4 +141,3 @@ private fun SummaryItem(
         )
     }
 }
-

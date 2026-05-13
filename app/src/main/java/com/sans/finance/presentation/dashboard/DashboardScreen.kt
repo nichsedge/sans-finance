@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -91,7 +93,10 @@ fun DashboardScreen(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { showViewMenu = true }
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable { showViewMenu = true }
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
                     ) {
                         Text(
                             "Dashboard",
@@ -134,7 +139,6 @@ fun DashboardScreen(
                         }
                     }
                 },
-
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
@@ -155,7 +159,7 @@ fun DashboardScreen(
                 )
                 .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
                 NetWorthCard(
@@ -234,16 +238,12 @@ fun DashboardScreen(
 
             if (state.goals.isNotEmpty()) {
                 item {
-                    Text(
-                        "GOAL PROGRESS",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        letterSpacing = 1.5.sp
-                    )
+                    SectionHeader("GOAL PROGRESS")
                     Spacer(modifier = Modifier.height(8.dp))
-                    state.goals.forEach { goal ->
-                        DashboardGoalItem(goal, state.currentCurrency, state.isPrivacyModeEnabled)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.goals.forEach { goal ->
+                            DashboardGoalItem(goal, state.currentCurrency, state.isPrivacyModeEnabled)
+                        }
                     }
                 }
             }
@@ -256,18 +256,17 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            "UPCOMING BILLS",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary,
-                            letterSpacing = 1.5.sp
-                        )
+                        SectionHeader("UPCOMING BILLS")
                         Box {
                             Text(
                                 "See All",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { showBillsMenu = true }
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .clickable { showBillsMenu = true }
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                             DropdownMenu(
                                 expanded = showBillsMenu,
@@ -291,29 +290,26 @@ fun DashboardScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    state.upcomingBills.forEach { bill ->
-                        DashboardBillItem(bill, state.currentCurrency, state.isPrivacyModeEnabled)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.upcomingBills.forEach { bill ->
+                            DashboardBillItem(bill, state.currentCurrency, state.isPrivacyModeEnabled)
+                        }
                     }
                 }
             }
             if (state.recentTransactions.isNotEmpty()) {
                 item {
-                    Text(
-                        "RECENT TRANSACTIONS",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        letterSpacing = 1.5.sp
-                    )
+                    SectionHeader("RECENT TRANSACTIONS")
                     Spacer(modifier = Modifier.height(12.dp))
-                    state.recentTransactions.forEach { transaction ->
-                        RecentTransactionItem(
-                            transaction = transaction,
-                            currencyCode = state.currentCurrency,
-                            isPrivacyModeEnabled = state.isPrivacyModeEnabled,
-                            onClick = { onTransactionClick(transaction.id) }
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.recentTransactions.forEach { transaction ->
+                            RecentTransactionItem(
+                                transaction = transaction,
+                                currencyCode = state.currentCurrency,
+                                isPrivacyModeEnabled = state.isPrivacyModeEnabled,
+                                onClick = { onTransactionClick(transaction.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -321,6 +317,17 @@ fun DashboardScreen(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+}
+
+@Composable
+fun SectionHeader(text: String) {
+    Text(
+        text.uppercase(),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.secondary,
+        letterSpacing = 1.5.sp,
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @Composable
@@ -333,18 +340,17 @@ fun NetWorthCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        alpha = 0.8f
+        containerColor = MaterialTheme.colorScheme.primary,
+        alpha = 0.15f
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 "Total Net Worth",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             PrivacyText(
                 amount = netWorth,
@@ -352,27 +358,31 @@ fun NetWorthCard(
                 isVisible = !isPrivacyModeEnabled,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 BreakdownItem(
                     "Assets",
                     assets,
-                    Color(0xFF4CAF50),
+                    MaterialTheme.colorScheme.tertiary,
                     currencyCode,
                     isPrivacyModeEnabled
                 )
-                VerticalDivider(modifier = Modifier.height(40.dp))
+                VerticalDivider(
+                    modifier = Modifier.height(32.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
                 BreakdownItem(
                     "Liabilities",
                     liabilities,
-                    Color(0xFFF44336),
+                    MaterialTheme.colorScheme.error,
                     currencyCode,
                     isPrivacyModeEnabled
                 )
@@ -393,14 +403,15 @@ fun BreakdownItem(
         Text(
             label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Bold
         )
         PrivacyText(
             amount = amount,
             currencyCode = currencyCode,
             isVisible = !isPrivacyModeEnabled,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Black,
             color = color
         )
     }
@@ -420,8 +431,9 @@ fun ForecastCard(
             .clickable { onClick() },
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier
@@ -434,14 +446,15 @@ fun ForecastCard(
                 Text(
                     "30-Day Forecast",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Bold
                 )
                 PrivacyText(
                     amount = projectedBalance,
                     currencyCode = currencyCode,
                     isVisible = !isPrivacyModeEnabled,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
@@ -467,23 +480,18 @@ fun WealthDistributionCard(
 ) {
     val total = distribution.values.sumOf { kotlin.math.abs(it) }.coerceAtLeast(1L)
 
-    GlassCard(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        alpha = 0.4f
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Wealth Distribution",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                "Wealth Distribution",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -492,8 +500,8 @@ fun WealthDistributionCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        MaterialTheme.shapes.small
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        CircleShape
                     )
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -503,13 +511,13 @@ fun WealthDistributionCard(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(MaterialTheme.shapes.small)
+                            .clip(CircleShape)
                             .background(
                                 if (isSelected) MaterialTheme.colorScheme.primary
                                 else Color.Transparent
                             )
                             .clickable { onTabSelected(tab) }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 6.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -519,7 +527,7 @@ fun WealthDistributionCard(
                                 WealthDistributionTab.CATEGORY -> "Category"
                             },
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -527,14 +535,15 @@ fun WealthDistributionCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Simple Bar Chart
+            // Stacked Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(16.dp)
-                    .clip(MaterialTheme.shapes.small)
+                    .height(12.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 distribution.entries.forEachIndexed { index, entry ->
                     val weight =
@@ -556,10 +565,10 @@ fun WealthDistributionCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Legend
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 distribution.entries.forEachIndexed { index, entry ->
                     val entryValue = kotlin.math.abs(entry.value)
                     val percentage = (entryValue.toFloat() / total.toFloat() * 100).toInt()
@@ -573,15 +582,15 @@ fun WealthDistributionCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(12.dp)
-                                .background(color, MaterialTheme.shapes.small)
+                                .size(10.dp)
+                                .background(color, CircleShape)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 entry.key,
                                 style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
                                 "$percentage%",
@@ -593,8 +602,8 @@ fun WealthDistributionCard(
                             amount = entry.value,
                             currencyCode = currencyCode,
                             isVisible = !isPrivacyModeEnabled,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Black
                         )
                     }
                 }
@@ -611,22 +620,16 @@ fun MonthlyCashFlowCard(
     currencyCode: String,
     isPrivacyModeEnabled: Boolean
 ) {
-    val animatedSavings by animateFloatAsState(
-        targetValue = savingsRate,
-        animationSpec = tween(800),
-        label = "savingsRate"
-    )
-    GlassCard(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        alpha = 0.4f
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                "This Month",
-                style = MaterialTheme.typography.titleMedium,
+                "Monthly Cash Flow",
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
             Row(
@@ -634,81 +637,41 @@ fun MonthlyCashFlowCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Income box
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(
-                            Color(0xFF1B5E20).copy(alpha = 0.12f),
-                            MaterialTheme.shapes.medium
-                        )
-                        .padding(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.ArrowUpward,
-                            contentDescription = null,
-                            tint = Color(0xFF4CAF50),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            "Income",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF4CAF50)
-                        )
-                    }
-                    PrivacyText(
-                        amount = income,
-                        currencyCode = currencyCode,
-                        isVisible = !isPrivacyModeEnabled,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4CAF50)
-                    )
-                }
+                FlowBox(
+                    label = "Income",
+                    amount = income,
+                    currencyCode = currencyCode,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    icon = Icons.Default.ArrowUpward,
+                    isPrivacyModeEnabled = isPrivacyModeEnabled,
+                    modifier = Modifier.weight(1f)
+                )
                 // Expense box
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(
-                            Color(0xFFB71C1C).copy(alpha = 0.12f),
-                            MaterialTheme.shapes.medium
-                        )
-                        .padding(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.ArrowDownward,
-                            contentDescription = null,
-                            tint = Color(0xFFF44336),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            "Expense",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFF44336)
-                        )
-                    }
-                    PrivacyText(
-                        amount = expense,
-                        currencyCode = currencyCode,
-                        isVisible = !isPrivacyModeEnabled,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFF44336)
-                    )
-                }
+                FlowBox(
+                    label = "Expense",
+                    amount = expense,
+                    currencyCode = currencyCode,
+                    color = MaterialTheme.colorScheme.error,
+                    icon = Icons.Default.ArrowDownward,
+                    isPrivacyModeEnabled = isPrivacyModeEnabled,
+                    modifier = Modifier.weight(1f)
+                )
             }
             if (income > 0) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            MaterialTheme.shapes.large
+                        )
+                        .padding(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Monthly Savings Rate",
+                            "Savings Rate",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -722,14 +685,56 @@ fun MonthlyCashFlowCard(
                     }
                     com.sans.finance.presentation.components.CircularGauge(
                         progress = savingsRate,
-                        size = 64.dp,
-                        color = if (savingsRate >= 0.2f) Color(0xFF4CAF50)
+                        size = 56.dp,
+                        color = if (savingsRate >= 0.2f) MaterialTheme.colorScheme.tertiary
                         else if (savingsRate >= 0.1f) Color(0xFFFFC107)
-                        else Color(0xFFF44336)
+                        else MaterialTheme.colorScheme.error
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FlowBox(
+    label: String,
+    amount: Long,
+    currencyCode: String,
+    color: Color,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isPrivacyModeEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(color.copy(alpha = 0.08f), MaterialTheme.shapes.large)
+            .border(1.dp, color.copy(alpha = 0.1f), MaterialTheme.shapes.large)
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = color,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        PrivacyText(
+            amount = amount,
+            currencyCode = currencyCode,
+            isVisible = !isPrivacyModeEnabled,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Black,
+            color = color
+        )
     }
 }
 
@@ -739,20 +744,22 @@ fun AiAdvisorCard(suggestions: List<String>) {
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-        )
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    androidx.compose.material.icons.Icons.Default.SmartToy,
+                    Icons.Default.SmartToy,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     "AI Insights",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
@@ -760,12 +767,17 @@ fun AiAdvisorCard(suggestions: List<String>) {
             Spacer(modifier = Modifier.height(12.dp))
             suggestions.forEach { suggestion ->
                 Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                    Text("•", color = MaterialTheme.colorScheme.onTertiaryContainer)
+                    Text(
+                        "•",
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         suggestion,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        lineHeight = 16.sp
                     )
                 }
             }
@@ -778,9 +790,11 @@ fun DashboardGoalItem(goal: DashboardGoal, currencyCode: String, isPrivacyModeEn
     val progress = goal.progress
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shape = MaterialTheme.shapes.large
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -791,18 +805,29 @@ fun DashboardGoalItem(goal: DashboardGoal, currencyCode: String, isPrivacyModeEn
                     fontWeight = FontWeight.Bold
                 )
                 if (!isPrivacyModeEnabled) {
-                    Text("${(progress * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black
+                    )
                 } else {
-                    Text("•••%", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "••%",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp),
-                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                    .height(6.dp)
+                    .clip(CircleShape),
+                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }
@@ -817,9 +842,7 @@ fun DashboardBillItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                alpha = 0.15f
-            )
+            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
         ),
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
@@ -833,7 +856,7 @@ fun DashboardBillItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(44.dp)
                     .background(
                         MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                         MaterialTheme.shapes.medium
@@ -841,8 +864,8 @@ fun DashboardBillItem(
                 contentAlignment = Alignment.Center
             ) {
                 CategoryIcon(
-                    icon = bill.categoryIcon ?: "",
-                    fontSize = 20.sp
+                    icon = bill.categoryIcon ?: "📄",
+                    fontSize = 22.sp
                 )
             }
 
@@ -851,7 +874,8 @@ fun DashboardBillItem(
                     text = bill.note.ifBlank { bill.categoryName ?: "Upcoming Bill" },
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
                 )
                 Text(
                     text = if (bill.isInstallmentPayment) "Installment ${bill.installmentMonth}/${bill.installmentTotalMonths}"
@@ -884,42 +908,30 @@ fun GlobalBudgetCard(
     val progress = (spent.toFloat() / budget.toFloat()).coerceIn(0f, 1f)
     val isOverBudget = spent > budget
     val remaining = (budget - spent).coerceAtLeast(0L)
-    val errorColor = MaterialTheme.colorScheme.error
+    val color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = if (isOverBudget)
-                errorColor.copy(alpha = 0.1f)
-            else MaterialTheme.colorScheme.surface
+            containerColor = if (isOverBudget) color.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surface
         ),
-        border = if (isOverBudget)
-            BorderStroke(
-                1.dp,
-                errorColor.copy(alpha = 0.5f)
-            )
-        else null
+        border = BorderStroke(
+            1.dp,
+            if (isOverBudget) color.copy(alpha = 0.3f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Global Budget",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Column(horizontalAlignment = Alignment.End) {
+                Column {
                     Text(
-                        if (isOverBudget) "OVER BUDGET" else "ON TRACK",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isOverBudget) MaterialTheme.colorScheme.error else Color(
-                            0xFF4CAF50
-                        ),
-                        fontWeight = FontWeight.Black
+                        "Global Budget",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         "$daysLeft days left",
@@ -927,21 +939,35 @@ fun GlobalBudgetCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Text(
+                    if (isOverBudget) "OVER BUDGET" else "ON TRACK",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier
+                        .background(
+                            (if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary).copy(
+                                alpha = 0.1f
+                            ),
+                            CircleShape
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(MaterialTheme.shapes.small),
-                color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    .height(10.dp)
+                    .clip(CircleShape),
+                color = color,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -951,29 +977,31 @@ fun GlobalBudgetCard(
                     Text(
                         "Spent",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                     PrivacyText(
                         amount = spent,
                         currencyCode = currencyCode,
                         isVisible = !isPrivacyModeEnabled,
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Black
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         if (isOverBudget) "Overspent" else "Remaining",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                     PrivacyText(
                         amount = if (isOverBudget) spent - budget else remaining,
                         currencyCode = currencyCode,
                         isVisible = !isPrivacyModeEnabled,
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        fontWeight = FontWeight.Black,
+                        color = color
                     )
                 }
             }
@@ -1112,7 +1140,8 @@ fun FinancialFreedomCard(
                                 label = { Text("Annual Expense ($currencyCode)") },
                                 modifier = Modifier.fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                singleLine = true
+                                singleLine = true,
+                                shape = MaterialTheme.shapes.large
                             )
                             Text(
                                 "Override auto-tracking to account for inflation or missing data.",
@@ -1140,10 +1169,8 @@ fun FinancialFreedomCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(
             modifier = Modifier
@@ -1151,7 +1178,7 @@ fun FinancialFreedomCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f),
                             MaterialTheme.colorScheme.surface
                         )
                     )
@@ -1181,17 +1208,17 @@ fun FinancialFreedomCard(
                 IconButton(
                     onClick = { showHelp = true },
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(36.dp)
                         .background(
                             MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                            MaterialTheme.shapes.medium
+                            CircleShape
                         )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = "Help",
                         tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -1205,17 +1232,18 @@ fun FinancialFreedomCard(
             ) {
                 com.sans.finance.presentation.components.CircularGauge(
                     progress = freedomScore,
-                    size = 90.dp,
+                    size = 80.dp,
                     strokeWidth = 10.dp,
                     color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                    trackColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Years of Cover",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         if (isPrivacyModeEnabled) "••.• years" else String.format(
@@ -1228,7 +1256,7 @@ fun FinancialFreedomCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     val statusText = when {
                         yearsOfCover >= 25.0 -> "You are Financially Free!"
@@ -1241,7 +1269,7 @@ fun FinancialFreedomCard(
                         statusText,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -1250,7 +1278,7 @@ fun FinancialFreedomCard(
 
             // Progress towards FIRE Target (25x)
             val fireProgress = (yearsOfCover / 25.0).coerceIn(0.0, 1.0).toFloat()
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -1258,12 +1286,13 @@ fun FinancialFreedomCard(
                     Text(
                         "FIRE Progress (25x Expenses)",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         "${(fireProgress * 100).toInt()}%",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -1272,14 +1301,16 @@ fun FinancialFreedomCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(10.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape),
+                        .clip(CircleShape),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                 )
             }
         }
     }
 }
+
 @Composable
 fun RecentTransactionItem(
     transaction: com.sans.finance.domain.model.Expense,
@@ -1291,41 +1322,42 @@ fun RecentTransactionItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val isIncome = transaction.type == "INCOME"
-            
+            val statusColor = if (isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
+
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(44.dp)
                     .background(
-                        if (isIncome) Color(0xFFE8F5E9) else Color(0xFFFBE9E7),
+                        (if (isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant).copy(
+                            alpha = 0.1f
+                        ),
                         MaterialTheme.shapes.medium
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 CategoryIcon(
                     icon = transaction.categoryIcon ?: (if (isIncome) "💰" else "💸"),
-                    fontSize = 24.sp
+                    fontSize = 22.sp
                 )
             }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.note.ifBlank { transaction.categoryName ?: "Transaction" },
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
@@ -1334,7 +1366,7 @@ fun RecentTransactionItem(
                 } else {
                     transaction.description ?: ""
                 }
-                
+
                 if (subtitle.isNotBlank()) {
                     Text(
                         text = subtitle,
@@ -1352,7 +1384,7 @@ fun RecentTransactionItem(
                     isVisible = !isPrivacyModeEnabled,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Black,
-                    color = if (isIncome) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                    color = statusColor
                 )
                 Text(
                     text = com.sans.finance.core.util.DateFormatterUtils.getStandardFormatter()

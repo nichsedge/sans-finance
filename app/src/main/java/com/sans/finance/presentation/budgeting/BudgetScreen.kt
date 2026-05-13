@@ -1,6 +1,7 @@
 package com.sans.finance.presentation.budgeting
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -54,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sans.finance.domain.model.Category
 import com.sans.finance.presentation.components.PrivacyText
@@ -70,7 +72,7 @@ fun BudgetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Budgets", fontWeight = FontWeight.Bold) },
+                title = { Text("Budgets", fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -83,7 +85,8 @@ fun BudgetScreen(
             FloatingActionButton(
                 onClick = { showAddDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Budget")
             }
@@ -101,21 +104,22 @@ fun BudgetScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 64.dp),
+                            .padding(vertical = 120.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 Icons.Default.Language,
                                 contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.outlineVariant
+                                modifier = Modifier.size(80.dp),
+                                tint = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                             )
-                            Spacer(Modifier.height(16.dp))
+                            Spacer(Modifier.height(24.dp))
                             Text(
                                 "No budgets set yet",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.outline
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
                                 "Plan your spending better!",
@@ -168,14 +172,21 @@ fun BudgetItem(
     val remaining = (status.budget.amount - status.spent).coerceAtLeast(0L)
     val overspent = (status.spent - status.budget.amount).coerceAtLeast(0L)
 
+    val accentColor = if (isOverBudget) MaterialTheme.colorScheme.error
+                      else if (progress > 0.8f) Color(0xFFFF9800)
+                      else MaterialTheme.colorScheme.primary
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = if (isOverBudget)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.05f)
+            else MaterialTheme.colorScheme.surface
+        ),
+        border = if (isOverBudget)
+            androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
+            else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -187,26 +198,30 @@ fun BudgetItem(
                     Text(
                         status.categoryName ?: "Global Budget",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Black
                     )
                     Text(
                         "Monthly limit",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                IconButton(onClick = onDelete) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.error.copy(alpha = 0.05f), CircleShape)
+                ) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -219,51 +234,54 @@ fun BudgetItem(
                     isVisible = !isPrivacyModeEnabled,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
-                    color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                    color = accentColor
                 )
-                Row(verticalAlignment = Alignment.Bottom) {
+                Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 4.dp)) {
                     Text(
                         "of ",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        fontWeight = FontWeight.Bold
                     )
                     PrivacyText(
                         amount = status.budget.amount,
                         currencyCode = currencyCode,
                         isVisible = !isPrivacyModeEnabled,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             LinearProgressIndicator(
                 progress = { animatedProgress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = if (isOverBudget) MaterialTheme.colorScheme.error
-                else if (progress > 0.8f) Color(0xFFFF9800)
-                else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    .height(10.dp)
+                    .clip(CircleShape),
+                color = accentColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isOverBudget) {
-                    Row {
+                    Row(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             "Overspent by ",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.Bold
                         )
@@ -271,24 +289,27 @@ fun BudgetItem(
                             amount = overspent,
                             currencyCode = currencyCode,
                             isVisible = !isPrivacyModeEnabled,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black
                         )
                     }
                 } else {
-                    Row {
+                    Row(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         PrivacyText(
                             amount = remaining,
                             currencyCode = currencyCode,
                             isVisible = !isPrivacyModeEnabled,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black
                         )
                         Text(
                             " left",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
@@ -298,7 +319,8 @@ fun BudgetItem(
                 Text(
                     "${(progress * 100).toInt()}%",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black,
+                    color = accentColor
                 )
             }
         }
@@ -319,7 +341,7 @@ fun AddBudgetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set New Budget") },
+        title = { Text("Set New Budget", fontWeight = FontWeight.Black) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
@@ -364,7 +386,7 @@ fun AddBudgetDialog(
                             },
                             leadingIcon = { Icon(Icons.Default.Language, null) }
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                         categories.filter { it.type == "EXPENSE" }.forEach { category ->
                             DropdownMenuItem(
                                 text = { Text(category.name) },
@@ -389,13 +411,14 @@ fun AddBudgetDialog(
                 },
                 shape = MaterialTheme.shapes.large
             ) {
-                Text("Set Budget")
+                Text("Set Budget", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
+        shape = MaterialTheme.shapes.extraLarge
     )
 }

@@ -1,17 +1,21 @@
 package com.sans.finance.presentation.accounts
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -53,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sans.finance.R
 import com.sans.finance.core.util.CurrencyFormatter
+import com.sans.finance.presentation.components.GlassCard
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -74,23 +79,29 @@ fun AccountStatsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(stringResource(R.string.account_stats), fontWeight = FontWeight.Bold)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = viewModel::onPreviousMonth) {
+                        Text(stringResource(R.string.account_stats), fontWeight = FontWeight.Black)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape).padding(horizontal = 4.dp)
+                        ) {
+                            IconButton(onClick = viewModel::onPreviousMonth, modifier = Modifier.size(32.dp)) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                    contentDescription = "Previous"
+                                    contentDescription = "Previous",
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                             Text(
                                 monthYearFormat.format(state.selectedDate.time),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.padding(horizontal = 8.dp)
                             )
-                            IconButton(onClick = viewModel::onNextMonth) {
+                            IconButton(onClick = viewModel::onNextMonth, modifier = Modifier.size(32.dp)) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = "Next"
+                                    contentDescription = "Next",
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -120,34 +131,45 @@ fun AccountStatsScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // Balance Section
-                Column {
-                    Text(
-                        "Cash Liquidity",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        CurrencyFormatter.formatAmount(state.totalBalance, state.currentCurrency),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Black
-                    )
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    alpha = 0.1f
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "Cash Liquidity",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            CurrencyFormatter.formatAmount(state.totalBalance, state.currentCurrency),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
 
                 // Line Chart
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             "Balance History",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
                         )
+                        Spacer(Modifier.height(20.dp))
                         TotalStatsLineChart(
                             history = state.balanceHistory,
                             currencyCode = state.currentCurrency
@@ -158,21 +180,26 @@ fun AccountStatsScreen(
                 // Bar Chart
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             "Income vs Expenses",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
                         )
+                        Spacer(Modifier.height(20.dp))
                         TotalStatsBarChart(
                             history = state.incomeExpenseHistory,
                             currencyCode = state.currentCurrency
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -184,19 +211,21 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
 
     val textMeasurer = rememberTextMeasurer()
     val labelStyle = TextStyle(
-        fontSize = 9.sp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        fontSize = 10.sp,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+        fontWeight = FontWeight.Bold
     )
-    val lineColor = Color(0xFFFF6B6B) // Salmon/Red
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    val lineColor = MaterialTheme.colorScheme.primary
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
 
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     val tooltipStyle = MaterialTheme.typography.labelMedium.copy(
         color = MaterialTheme.colorScheme.onPrimary,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Black
     )
     val tooltipDateStyle = MaterialTheme.typography.labelSmall.copy(
-        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+        fontWeight = FontWeight.Bold
     )
 
     Box(
@@ -211,7 +240,7 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     detectDragGestures(
                         onDragStart = { offset ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val stepX = chartWidth / (history.size - 1).coerceAtLeast(1)
 
@@ -221,7 +250,7 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                         },
                         onDrag = { change, _ ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val stepX = chartWidth / (history.size - 1).coerceAtLeast(1)
 
@@ -237,7 +266,7 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     detectTapGestures(
                         onPress = { offset ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val stepX = chartWidth / (history.size - 1).coerceAtLeast(1)
 
@@ -250,10 +279,10 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     )
                 }
         ) {
-            val chartTop = 40f
-            val chartBottom = size.height - 60f
+            val chartTop = 20f
+            val chartBottom = size.height - 40f
             val chartLeft = 100f
-            val chartRight = size.width - 40f
+            val chartRight = size.width - 20f
             val chartHeight = chartBottom - chartTop
             val chartWidth = chartRight - chartLeft
 
@@ -272,7 +301,7 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     color = gridColor,
                     start = Offset(chartLeft, y),
                     end = Offset(chartRight, y),
-                    strokeWidth = 1f
+                    strokeWidth = 2f
                 )
 
                 val label = CurrencyFormatter.formatAmountCompact(value, currencyCode)
@@ -307,26 +336,33 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                 drawPath(
                     path = path,
                     color = lineColor,
-                    style = Stroke(width = 4f)
+                    style = Stroke(width = 6f, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
                 )
 
                 // Draw points and labels
                 points.forEachIndexed { index, point ->
-                    drawCircle(
-                        color = lineColor,
-                        radius = 4f,
-                        center = point
-                    )
+                    if (history.size < 15) {
+                        drawCircle(
+                            color = lineColor,
+                            radius = 6f,
+                            center = point
+                        )
+                        drawCircle(
+                            color = Color.White,
+                            radius = 3f,
+                            center = point
+                        )
+                    }
 
-                    // Month Label (Always show first and last, and some in between)
-                    if (index == 0 || index == history.size - 1 || history.size < 6) {
+                    // Month Label
+                    if (index == 0 || index == history.size - 1 || index % (history.size / 4).coerceAtLeast(1) == 0) {
                         val monthLayout =
                             textMeasurer.measure(history[index].first, style = labelStyle)
                         drawText(
                             textLayoutResult = monthLayout,
                             topLeft = Offset(
                                 point.x - monthLayout.size.width / 2f,
-                                chartBottom + 8f
+                                chartBottom + 12f
                             )
                         )
                     }
@@ -339,7 +375,7 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
 
                     // Vertical guide line
                     drawLine(
-                        color = lineColor.copy(alpha = 0.4f),
+                        color = lineColor.copy(alpha = 0.2f),
                         start = Offset(point.x, chartTop),
                         end = Offset(point.x, chartBottom),
                         strokeWidth = 2f,
@@ -349,12 +385,12 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     // Highlight circle
                     drawCircle(
                         color = lineColor,
-                        radius = 12f,
+                        radius = 10f,
                         center = point
                     )
                     drawCircle(
                         color = Color.White,
-                        radius = 6f,
+                        radius = 5f,
                         center = point
                     )
 
@@ -365,30 +401,29 @@ fun TotalStatsLineChart(history: List<Pair<String, Long>>, currencyCode: String)
                     val valueLayout = textMeasurer.measure(valueStr, tooltipStyle)
                     val dateLayout = textMeasurer.measure(dateStr, tooltipDateStyle)
 
-                    val tooltipWidth = maxOf(valueLayout.size.width, dateLayout.size.width) + 48f
-                    val tooltipHeight = valueLayout.size.height + dateLayout.size.height + 32f
+                    val tooltipWidth = maxOf(valueLayout.size.width, dateLayout.size.width) + 32f
+                    val tooltipHeight = valueLayout.size.height + dateLayout.size.height + 24f
 
                     var tooltipX = point.x - tooltipWidth / 2f
-                    if (tooltipX < chartLeft) tooltipX = chartLeft + 16f
-                    if (tooltipX + tooltipWidth > chartRight) tooltipX =
-                        chartRight - tooltipWidth - 16f
+                    if (tooltipX < chartLeft) tooltipX = chartLeft
+                    if (tooltipX + tooltipWidth > chartRight) tooltipX = chartRight - tooltipWidth
 
-                    val tooltipY = (point.y - tooltipHeight - 32f).coerceAtLeast(chartTop + 16f)
+                    val tooltipY = (point.y - tooltipHeight - 24f).coerceAtLeast(chartTop)
 
                     drawRoundRect(
                         color = lineColor,
                         topLeft = Offset(tooltipX, tooltipY),
                         size = Size(tooltipWidth, tooltipHeight),
-                        cornerRadius = CornerRadius(16f, 16f)
+                        cornerRadius = CornerRadius(12f, 12f)
                     )
 
                     drawText(
                         textLayoutResult = dateLayout,
-                        topLeft = Offset(tooltipX + 24f, tooltipY + 16f)
+                        topLeft = Offset(tooltipX + 16f, tooltipY + 12f)
                     )
                     drawText(
                         textLayoutResult = valueLayout,
-                        topLeft = Offset(tooltipX + 24f, tooltipY + 16f + dateLayout.size.height)
+                        topLeft = Offset(tooltipX + 16f, tooltipY + 12f + dateLayout.size.height)
                     )
                 }
             }
@@ -402,20 +437,21 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
 
     val textMeasurer = rememberTextMeasurer()
     val labelStyle = TextStyle(
-        fontSize = 9.sp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        fontSize = 10.sp,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+        fontWeight = FontWeight.Bold
     )
-    val incomeColor = Color(0xFF64B5F6) // Blue
-    val expenseColor = Color(0xFFFF8A65) // Red/Orange
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    val incomeColor = MaterialTheme.colorScheme.tertiary
+    val expenseColor = MaterialTheme.colorScheme.error
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
 
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     val tooltipStyle = MaterialTheme.typography.labelMedium.copy(
         color = MaterialTheme.colorScheme.onSurface,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Black
     )
 
-    val highlightColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+    val highlightColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     Box(
@@ -430,7 +466,7 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                     detectDragGestures(
                         onDragStart = { offset ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val barGroupWidth = chartWidth / history.size
                             val index = ((offset.x - chartLeft) / barGroupWidth).toInt()
@@ -439,7 +475,7 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                         },
                         onDrag = { change, _ ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val barGroupWidth = chartWidth / history.size
                             val index = ((change.position.x - chartLeft) / barGroupWidth).toInt()
@@ -454,7 +490,7 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                     detectTapGestures(
                         onPress = { offset ->
                             val chartLeft = 100f
-                            val chartRight = size.width - 40f
+                            val chartRight = size.width - 20f
                             val chartWidth = chartRight - chartLeft
                             val barGroupWidth = chartWidth / history.size
                             val index = ((offset.x - chartLeft) / barGroupWidth).toInt()
@@ -467,9 +503,9 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                 }
         ) {
             val chartTop = 40f
-            val chartBottom = size.height - 80f
+            val chartBottom = size.height - 60f
             val chartLeft = 100f
-            val chartRight = size.width - 40f
+            val chartRight = size.width - 20f
             val chartHeight = chartBottom - chartTop
             val chartWidth = chartRight - chartLeft
 
@@ -487,7 +523,7 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                     color = gridColor,
                     start = Offset(chartLeft, y),
                     end = Offset(chartRight, y),
-                    strokeWidth = 1f
+                    strokeWidth = 2f
                 )
 
                 val label = CurrencyFormatter.formatAmountCompact(value, currencyCode)
@@ -504,24 +540,25 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
             // Draw Bars
             if (history.isNotEmpty()) {
                 val barGroupWidth = chartWidth / history.size
-                val barWidth = barGroupWidth * 0.3f
-                val spacing = barGroupWidth * 0.1f
+                val barWidth = barGroupWidth * 0.35f
+                val spacing = barGroupWidth * 0.05f
 
                 history.forEachIndexed { index, data ->
                     val groupCenterX = chartLeft + index * barGroupWidth + barGroupWidth / 2f
 
                     // Highlight background for selected group
                     if (selectedIndex == index) {
-                        drawRect(
+                        drawRoundRect(
                             color = highlightColor,
-                            topLeft = Offset(chartLeft + index * barGroupWidth, chartTop),
-                            size = Size(barGroupWidth, chartBottom - chartTop)
+                            topLeft = Offset(chartLeft + index * barGroupWidth + 4f, chartTop),
+                            size = Size(barGroupWidth - 8f, chartBottom - chartTop),
+                            cornerRadius = CornerRadius(8f, 8f)
                         )
                     }
 
-                    // Income Bar (Blue)
+                    // Income Bar (Emerald)
                     val incomeHeight = (data.second / range) * chartHeight
-                    drawRect(
+                    drawRoundRect(
                         color = if (selectedIndex == null || selectedIndex == index) incomeColor else incomeColor.copy(
                             alpha = 0.3f
                         ),
@@ -529,28 +566,32 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                             groupCenterX - barWidth - spacing / 2f,
                             chartBottom - incomeHeight
                         ),
-                        size = Size(barWidth, incomeHeight)
+                        size = Size(barWidth, incomeHeight),
+                        cornerRadius = CornerRadius(4f, 4f)
                     )
 
-                    // Expense Bar (Red)
+                    // Expense Bar (Rose)
                     val expenseHeight = (data.third / range) * chartHeight
-                    drawRect(
+                    drawRoundRect(
                         color = if (selectedIndex == null || selectedIndex == index) expenseColor else expenseColor.copy(
                             alpha = 0.3f
                         ),
                         topLeft = Offset(groupCenterX + spacing / 2f, chartBottom - expenseHeight),
-                        size = Size(barWidth, expenseHeight)
+                        size = Size(barWidth, expenseHeight),
+                        cornerRadius = CornerRadius(4f, 4f)
                     )
 
                     // Month Label
-                    val monthLayout = textMeasurer.measure(data.first, style = labelStyle)
-                    drawText(
-                        textLayoutResult = monthLayout,
-                        topLeft = Offset(
-                            groupCenterX - monthLayout.size.width / 2f,
-                            chartBottom + 4f
+                    if (index == 0 || index == history.size - 1 || index % (history.size / 4).coerceAtLeast(1) == 0) {
+                        val monthLayout = textMeasurer.measure(data.first, style = labelStyle)
+                        drawText(
+                            textLayoutResult = monthLayout,
+                            topLeft = Offset(
+                                groupCenterX - monthLayout.size.width / 2f,
+                                chartBottom + 8f
+                            )
                         )
-                    )
+                    }
 
                     // Tooltip for Bar Chart
                     if (selectedIndex == index) {
@@ -572,12 +613,12 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                         val expLayout =
                             textMeasurer.measure(expStr, tooltipStyle.copy(color = expenseColor))
 
-                        val tWidth = maxOf(incLayout.size.width, expLayout.size.width) + 48f
-                        val tHeight = incLayout.size.height + expLayout.size.height + 32f
+                        val tWidth = maxOf(incLayout.size.width, expLayout.size.width) + 32f
+                        val tHeight = incLayout.size.height + expLayout.size.height + 24f
 
                         var tX = groupCenterX - tWidth / 2f
-                        if (tX < chartLeft) tX = chartLeft + 16f
-                        if (tX + tWidth > chartRight) tX = chartRight - tWidth - 16f
+                        if (tX < chartLeft) tX = chartLeft
+                        if (tX + tWidth > chartRight) tX = chartRight - tWidth
 
                         val tY = chartTop - 10f
 
@@ -585,20 +626,20 @@ fun TotalStatsBarChart(history: List<Triple<String, Long, Long>>, currencyCode: 
                             color = surfaceColor,
                             topLeft = Offset(tX, tY),
                             size = Size(tWidth, tHeight),
-                            cornerRadius = CornerRadius(16f, 16f),
+                            cornerRadius = CornerRadius(12f, 12f),
                             style = Stroke(width = 2f)
                         )
                         drawRoundRect(
                             color = surfaceColor,
                             topLeft = Offset(tX, tY),
                             size = Size(tWidth, tHeight),
-                            cornerRadius = CornerRadius(16f, 16f)
+                            cornerRadius = CornerRadius(12f, 12f)
                         )
 
-                        drawText(textLayoutResult = incLayout, topLeft = Offset(tX + 24f, tY + 16f))
+                        drawText(textLayoutResult = incLayout, topLeft = Offset(tX + 16f, tY + 12f))
                         drawText(
                             textLayoutResult = expLayout,
-                            topLeft = Offset(tX + 24f, tY + 16f + incLayout.size.height)
+                            topLeft = Offset(tX + 16f, tY + 12f + incLayout.size.height)
                         )
                     }
                 }

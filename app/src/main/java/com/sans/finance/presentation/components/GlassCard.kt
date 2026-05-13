@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.dp
 fun GlassCard(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surface,
-    alpha: Float = 0.4f,
+    alpha: Float = 0.5f,
+    borderAlpha: Float = 0.1f,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
@@ -29,7 +30,7 @@ fun GlassCard(
                 Brush.verticalGradient(
                     colors = listOf(
                         containerColor.copy(alpha = alpha),
-                        containerColor.copy(alpha = alpha * 0.5f)
+                        containerColor.copy(alpha = alpha * 0.7f)
                     )
                 )
             )
@@ -37,15 +38,15 @@ fun GlassCard(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.2f),
-                        Color.White.copy(alpha = 0.05f)
+                        Color.White.copy(alpha = borderAlpha * 2),
+                        Color.White.copy(alpha = borderAlpha)
                     )
                 ),
                 shape = MaterialTheme.shapes.extraLarge
             )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             content = content
         )
     }

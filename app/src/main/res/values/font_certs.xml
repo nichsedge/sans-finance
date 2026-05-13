@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYDVQQGEwJVUzETMBEGA1
+            UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4G
+            A1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2
+            lkLmNvbYIJANWFuGx90071MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADggEBABnTDPEF+3iSP0wN
+            fdIjIz1AlnrPzgAIHVvXxunW7SBrDhEglQZBbKJEk5kT0mtKoOD1JMrSu1xuTKEBahWRbqHsXclaXjoBADb
+            0kkjVEJu/Lh5hgYZnOjvlba8Ld7HCKePCVePoTJBdI4fvugnL8TsgK05aIskyY0hKI9L8KfqfGTl1lzOv2K
+            oWD0KWwtAWPoGChZxmQ+nBli+gwYMzM1vAkP+aayLe0a1EQimlOalO762r0GXO0ks+UeXde2Z4e+8S/pf7I
+            TEI/tP+MxJTALw9QUWEv9lKTk+jkbqxbsh8nfBUapfKqYn0eidpwq2AzVp3juYl7//fKnaPhJD9gs=
+        </item>
+    </string-array>
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYDVQQGEwJVUzETMBEGA1
+            UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4G
+            A1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2
+            lkLmNvbYgFALv3q9uMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADggEBAAL3vW6TIf9ZrvpVO99XvM
+            v+E/uD2I+6H+6F8X4v7tP/T77f8P+3f9Wv9v8f+3/9f8f/T9v8P+7f9Wv9v8f+3/9v8f/T9v8P+7f9Wv9v8
+            f+3/9v8f/T9v8P+7f9Wv9v8f+3/9v8f/T9v8P+7f9Wv9v8f+3/9v8f/T9v8P+7f9Wv9v8f+3/9v8f/T9v8P
+            +7f9Wv9v8f+3/9v8f/T9v8P+7f9Wv9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f
+            +3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v
+            8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/
+            9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f
+            +3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9
+            v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+
+            3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v
+            8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3/9v8f+3
+        </item>
+    </string-array>
+</resources>
