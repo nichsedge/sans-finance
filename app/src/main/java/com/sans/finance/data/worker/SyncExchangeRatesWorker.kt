@@ -31,32 +31,28 @@ class SyncExchangeRatesWorker @AssistedInject constructor(
             val response = client.newCall(request).execute()
             
             if (response.isSuccessful) {
-                val body = response.body?.string()
-                if (body != null) {
-                    val json = JSONObject(body)
-                    val rates = json.getJSONObject("rates")
-                    val exchangeRates = mutableListOf<ExchangeRateEntity>()
-                    
-                    val keys = rates.keys()
-                    while (keys.hasNext()) {
-                        val code = keys.next()
-                        val rateToBase = rates.getDouble(code)
-                        // rateToBase is 1 IDR = X CODE
-                        // We want rateToIdr (1 CODE = Y IDR)
-                        if (rateToBase > 0) {
-                            exchangeRates.add(
-                                ExchangeRateEntity(
-                                    code = code,
-                                    rateToIdr = 1.0 / rateToBase
-                                )
+                val body = response.body.string()
+                val json = JSONObject(body)
+                val rates = json.getJSONObject("rates")
+                val exchangeRates = mutableListOf<ExchangeRateEntity>()
+                
+                val keys = rates.keys()
+                while (keys.hasNext()) {
+                    val code = keys.next()
+                    val rateToBase = rates.getDouble(code)
+                    // rateToBase is 1 IDR = X CODE
+                    // We want rateToIdr (1 CODE = Y IDR)
+                    if (rateToBase > 0) {
+                        exchangeRates.add(
+                            ExchangeRateEntity(
+                                code = code,
+                                rateToIdr = 1.0 / rateToBase
                             )
-                        }
+                        )
                     }
-                    currencyDao.insertRates(exchangeRates)
-                    Result.success()
-                } else {
-                    Result.failure()
                 }
+                currencyDao.insertRates(exchangeRates)
+                Result.success()
             } else {
                 Result.retry()
             }
