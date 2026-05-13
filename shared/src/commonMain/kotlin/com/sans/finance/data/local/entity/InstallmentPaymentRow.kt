@@ -1,6 +1,6 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.ColumnInfo
+import androidx.room3.ColumnInfo
 
 data class InstallmentPaymentRow(
     val id: Long,

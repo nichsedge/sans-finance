@@ -2,9 +2,9 @@ package com.sans.finance.domain.usecase
 
 import com.sans.finance.domain.model.Installment
 import com.sans.finance.domain.repository.InstallmentRepository
-import javax.inject.Inject
 
-class CreateInstallmentPlanUseCase @Inject constructor(
+
+class CreateInstallmentPlanUseCase constructor(
     private val installmentRepository: InstallmentRepository
 ) {
     suspend operator fun invoke(

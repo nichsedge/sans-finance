@@ -2,9 +2,9 @@ package com.sans.finance.domain.usecase
 
 import com.sans.finance.domain.model.Expense
 import com.sans.finance.domain.repository.ExpenseRepository
-import javax.inject.Inject
 
-class CheckDuplicateExpenseUseCase @Inject constructor(
+
+class CheckDuplicateExpenseUseCase constructor(
     private val repository: ExpenseRepository
 ) {
     suspend operator fun invoke(title: String, amount: Long, date: Long, accountId: Long): Expense? {

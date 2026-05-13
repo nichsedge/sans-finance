@@ -1,7 +1,7 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity(tableName = "budgets")
 data class BudgetEntity(
@@ -10,5 +10,5 @@ data class BudgetEntity(
     val categoryId: Long? = null,
     val accountId: Long? = null,
     val period: String = "MONTHLY", // MONTHLY, WEEKLY, YEARLY
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

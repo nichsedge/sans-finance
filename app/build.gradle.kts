@@ -1,10 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     // alias(libs.plugins.kotlin.android) is no longer required with AGP 9.0+ built-in Kotlin support
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
 }
 
 android {
@@ -29,7 +28,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Use debug signing for release for now if no release key is provided, 
+            // Use debug signing for release for now if no release key is provided,
             // or just let it fail if the user wants to set it up properly.
             // But for GitHub APK, we can just use debug signing if we want it to be easy.
             signingConfig = signingConfigs.getByName("debug")
@@ -38,11 +37,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
     }
     buildFeatures {
         compose = true
@@ -69,12 +63,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)

@@ -1,9 +1,9 @@
 package com.sans.finance.domain.usecase
 
 import com.sans.finance.domain.repository.CurrencyRepository
-import javax.inject.Inject
 
-class ConvertCurrencyUseCase @Inject constructor(
+
+class ConvertCurrencyUseCase constructor(
     private val currencyRepository: CurrencyRepository
 ) {
     suspend operator fun invoke(amount: Long, from: String, to: String): Long {

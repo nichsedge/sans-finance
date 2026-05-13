@@ -7,23 +7,23 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import dagger.hilt.android.HiltAndroidApp
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-@HiltAndroidApp
 class SansFinanceApp : Application(), Configuration.Provider {
 
-    @Inject
-    lateinit var workerFactory: androidx.hilt.work.HiltWorkerFactory
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
+    override val workManagerConfiguration: Configuration =
+        Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
             .build()
 
     override fun onCreate() {
         super.onCreate()
+        startKoin {
+            androidContext(this@SansFinanceApp)
+            modules(com.sans.finance.di.commonModule, com.sans.finance.di.platformModule)
+        }
         scheduleSync()
     }
 

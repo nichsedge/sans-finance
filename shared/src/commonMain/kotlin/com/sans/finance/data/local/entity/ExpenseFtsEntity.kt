@@ -1,7 +1,7 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.Entity
-import androidx.room.Fts4
+import androidx.room3.Entity
+import androidx.room3.Fts4
 
 @Fts4(contentEntity = ExpenseEntity::class)
 @Entity(tableName = "expenses_fts")

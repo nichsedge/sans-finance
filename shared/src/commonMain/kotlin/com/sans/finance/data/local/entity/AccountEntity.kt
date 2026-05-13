@@ -1,8 +1,8 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity(tableName = "accounts")
 data class AccountEntity(
@@ -11,6 +11,6 @@ data class AccountEntity(
     val type: String, // "Cash", "Bank", "Credit Card", "Loan", "Investment"
     val balance: Long,
     val currency: String = "IDR",
-    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "updated_at") val updatedAt: Long = System.currentTimeMillis()
+    @ColumnInfo(name = "created_at") val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow(),
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

@@ -1,17 +1,23 @@
 package com.sans.finance.domain.usecase
 
 import com.sans.finance.domain.repository.ExpenseRepository
-import java.util.Calendar
-import javax.inject.Inject
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
-class GetFrequencyBasedSuggestionsUseCase @Inject constructor(
+
+class GetFrequencyBasedSuggestionsUseCase constructor(
     private val repository: ExpenseRepository
 ) {
     suspend operator fun invoke(): List<String> {
-        val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1 // 0-6 starting from Sunday
+        val now = Clock.System.now()
+        val today = now.toLocalDateTime(TimeZone.currentSystemDefault())
+        val dayOfWeek = today.dayOfWeek.ordinal // 0-6 starting from Monday usually, but let's check
+        // DayOfWeek.MONDAY is 0 in Kotlin 1.9+, but in Calendar it's different.
+        // The DAO expects strftime('%w', ...) which is 0=Sunday, 1=Monday, etc.
+        val sundayBasedDay = (today.dayOfWeek.ordinal + 1) % 7
         
-        val daySuggestions = repository.getTopFrequentTitlesByDay(dayOfWeek, 5)
+        val daySuggestions = repository.getTopFrequentTitlesByDay(sundayBasedDay, 5)
         if (daySuggestions.isNotEmpty()) return daySuggestions
         
         return repository.getTopFrequentTitles(5)

@@ -1,29 +1,25 @@
 package com.sans.finance.data.worker
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.sans.finance.data.local.dao.CurrencyDao
 import com.sans.finance.data.local.entity.ExchangeRateEntity
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@HiltWorker
-class SyncExchangeRatesWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted params: WorkerParameters,
-    private val currencyDao: CurrencyDao
-) : CoroutineWorker(context, params) {
+class SyncExchangeRatesWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params), KoinComponent {
+
+    private val currencyDao: CurrencyDao by inject()
 
     override suspend fun doWork(): Result {
         val client = OkHttpClient()
-        // Using a free API (v6.exchangerate-api.com has a free tier, but requires key)
-        // For demonstration, we'll use a public one that doesn't need key if available, 
-        // or just fallback to hardcoded rates if it fails.
         val url = "https://open.er-api.com/v6/latest/IDR"
         
         return try {
@@ -31,7 +27,7 @@ class SyncExchangeRatesWorker @AssistedInject constructor(
             val response = client.newCall(request).execute()
             
             if (response.isSuccessful) {
-                val body = response.body.string()
+                val body = response.body?.string() ?: return Result.failure()
                 val json = JSONObject(body)
                 val rates = json.getJSONObject("rates")
                 val exchangeRates = mutableListOf<ExchangeRateEntity>()
@@ -40,8 +36,6 @@ class SyncExchangeRatesWorker @AssistedInject constructor(
                 while (keys.hasNext()) {
                     val code = keys.next()
                     val rateToBase = rates.getDouble(code)
-                    // rateToBase is 1 IDR = X CODE
-                    // We want rateToIdr (1 CODE = Y IDR)
                     if (rateToBase > 0) {
                         exchangeRates.add(
                             ExchangeRateEntity(

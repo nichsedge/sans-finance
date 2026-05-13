@@ -42,3 +42,9 @@
 # Keep WorkManager Workers
 -keep class com.sans.finance.data.worker.** { *; }
 -keep class androidx.hilt.work.** { *; }
+
+# Compose Multiplatform Resources
+-keep public class org.jetbrains.compose.resources.** { *; }
+-keep class sans_finance.shared.generated.resources.** { *; }
+-keep class com.sans.finance.shared.** { *; }
+-keep class com.sans.finance.shared.generated.resources.** { *; }

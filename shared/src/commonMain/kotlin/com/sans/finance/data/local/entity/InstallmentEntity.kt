@@ -1,10 +1,10 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.ForeignKey
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
 
 @Entity(
     tableName = "installments",
@@ -23,5 +23,5 @@ data class InstallmentEntity(
     @ColumnInfo(name = "expense_id") val expenseId: Long,
     val status: String,
     @ColumnInfo(name = "duration_months") val durationMonths: Int,
-    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
+    @ColumnInfo(name = "created_at") val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

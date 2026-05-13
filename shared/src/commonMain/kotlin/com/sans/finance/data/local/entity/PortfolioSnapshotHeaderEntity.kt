@@ -1,7 +1,7 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity(tableName = "portfolio_snapshot_headers")
 data class PortfolioSnapshotHeaderEntity(
@@ -9,5 +9,5 @@ data class PortfolioSnapshotHeaderEntity(
     val exchangeRateUsd: Double,        // IDR per USD at this date
     val totalValueIdr: Double,          // Pre-calculated total for faster history queries
     val totalValueUsd: Double,          // Pre-calculated total
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

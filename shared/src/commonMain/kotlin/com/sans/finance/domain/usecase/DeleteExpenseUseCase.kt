@@ -3,9 +3,9 @@ package com.sans.finance.domain.usecase
 import com.sans.finance.domain.model.Expense
 import com.sans.finance.domain.repository.ExpenseRepository
 import com.sans.finance.domain.repository.InstallmentRepository
-import javax.inject.Inject
 
-class DeleteExpenseUseCase @Inject constructor(
+
+class DeleteExpenseUseCase constructor(
     private val expenseRepository: ExpenseRepository,
     private val installmentRepository: InstallmentRepository
 ) {

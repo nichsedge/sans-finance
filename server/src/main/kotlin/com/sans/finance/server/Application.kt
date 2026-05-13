@@ -8,6 +8,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.http.content.*
 import kotlinx.serialization.json.Json
 import com.sans.finance.domain.model.Expense
 
@@ -32,7 +33,11 @@ fun Application.module() {
     }
     
     routing {
-        get("/") {
+        staticFiles("/", java.io.File("web")) {
+            default("index.html")
+        }
+        
+        get("/api/hello") {
             call.respondText("Sans Finance Multiplatform Server is running!")
         }
         

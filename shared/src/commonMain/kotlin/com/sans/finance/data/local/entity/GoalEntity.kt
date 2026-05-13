@@ -1,7 +1,7 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity(tableName = "goals")
 data class GoalEntity(
@@ -12,6 +12,6 @@ data class GoalEntity(
     val targetName: String? = null,   // Specific category or asset class name
     val currency: String = "IDR",
     val deadline: Long? = null,
-    val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow(),
+    val updatedAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

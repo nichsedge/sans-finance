@@ -1,8 +1,8 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.Embedded
-import androidx.room.Junction
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Junction
+import androidx.room3.Relation
 
 data class ExpenseWithTags(
     @Embedded val expense: ExpenseEntity,

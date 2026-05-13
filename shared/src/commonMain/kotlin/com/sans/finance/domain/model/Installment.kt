@@ -12,7 +12,7 @@ data class Installment(
     val remainingBalance: Long,
     val nextDueDate: Long,
     val status: String = "Active",
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow(),
     val expenseName: String? = null,
     val expenseDate: Long? = null
 )

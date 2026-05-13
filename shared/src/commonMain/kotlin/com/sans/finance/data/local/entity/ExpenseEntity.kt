@@ -1,9 +1,9 @@
 package com.sans.finance.data.local.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
 
 @Entity(
     tableName = "expenses",
@@ -29,6 +29,6 @@ data class ExpenseEntity(
     @ColumnInfo(name = "is_installment") val isInstallment: Boolean = false,
     @ColumnInfo(name = "recurrence_interval") val recurrenceInterval: String? = null,
     @ColumnInfo(name = "next_due_date") val nextDueDate: Long? = null,
-    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "updated_at") val updatedAt: Long = System.currentTimeMillis()
+    @ColumnInfo(name = "created_at") val createdAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow(),
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = com.sans.finance.core.util.DateTimeUtils.getNow()
 )

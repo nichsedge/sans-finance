@@ -18,16 +18,15 @@ import com.sans.finance.presentation.navigation.Screen
 import com.sans.finance.presentation.search.SearchScreen
 import com.sans.finance.presentation.settings.SettingsScreen
 import com.sans.finance.ui.theme.SansFinanceTheme
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.android.ext.android.inject
+import com.sans.finance.data.util.LocaleManager
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @javax.inject.Inject
-    lateinit var localeManager: com.sans.finance.data.util.LocaleManager
+    private val localeManager: LocaleManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        localeManager.updateResources(localeManager.getLocale())
+        // localeManager.updateResources(localeManager.getLocale())
         enableEdgeToEdge()
         setContent {
             SansFinanceTheme {
