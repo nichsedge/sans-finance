@@ -37,136 +37,105 @@ fun ExpenseItem(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        color = if (expense.isInstallmentPayment) MaterialTheme.colorScheme.surfaceVariant.copy(
-            alpha = 0.5f
-        ) else MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp
+        color = if (expense.isInstallmentPayment) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        tonalElevation = if (expense.isInstallmentPayment) 1.dp else 0.dp
     ) {
-        Column {
-            Row(
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Category Icon
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
             ) {
+                CategoryIcon(
+                    icon = categoryIcon,
+                    fontSize = 20.sp
+                )
+            }
+
+            // Details
+            Column(modifier = Modifier.weight(1f)) {
+                val noteText = expense.note.ifBlank { expense.description ?: "" }
+                val annotatedNote = remember(noteText, searchQuery) {
+                    if (searchQuery.isEmpty()) {
+                        androidx.compose.ui.text.AnnotatedString(noteText)
+                    } else {
+                        val builder = androidx.compose.ui.text.AnnotatedString.Builder(noteText)
+                        val lowerNote = noteText.lowercase()
+                        val lowerQuery = searchQuery.lowercase()
+                        var start = 0
+                        while (start < lowerNote.length) {
+                            val index = lowerNote.indexOf(lowerQuery, start)
+                            if (index == -1) break
+                            builder.addStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    background = Color.Yellow.copy(alpha = 0.4f),
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                start = index,
+                                end = index + lowerQuery.length
+                            )
+                            start = index + lowerQuery.length
+                        }
+                        builder.toAnnotatedString()
+                    }
+                }
+
+                Text(
+                    text = annotatedNote,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                
                 Row(
-                    modifier = Modifier.weight(0.35f),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    CategoryIcon(
-                        icon = categoryIcon,
-                        fontSize = 16.sp
-                    )
                     Text(
                         categoryName ?: stringResource(R.string.uncategorized),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1
+                    )
+                    Text(
+                        "•",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    Text(
+                        accountName ?: "Unknown",
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
-                }
-
-                Column(modifier = Modifier.weight(0.65f)) {
-                    val noteText = expense.note.ifBlank { expense.description ?: "" }
-                    val annotatedNote = remember(noteText, searchQuery) {
-                        if (searchQuery.isEmpty()) {
-                            androidx.compose.ui.text.AnnotatedString(noteText)
-                        } else {
-                            val builder = androidx.compose.ui.text.AnnotatedString.Builder(noteText)
-                            val lowerNote = noteText.lowercase()
-                            val lowerQuery = searchQuery.lowercase()
-                            var start = 0
-                            while (start < lowerNote.length) {
-                                val index = lowerNote.indexOf(lowerQuery, start)
-                                if (index == -1) break
-                                builder.addStyle(
-                                    style = androidx.compose.ui.text.SpanStyle(
-                                        background = Color.Yellow.copy(alpha = 0.4f),
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    start = index,
-                                    end = index + lowerQuery.length
-                                )
-                                start = index + lowerQuery.length
-                            }
-                            builder.toAnnotatedString()
-                        }
-                    }
-
-                    Text(
-                        text = annotatedNote,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (expense.isInstallmentPayment) MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.7f
-                        ) else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    
+                    val interval = expense.recurrenceInterval
+                    if (expense.isRecurring && interval != null) {
                         Text(
-                            accountName ?: "Unknown",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
-                        val interval = expense.recurrenceInterval
-                        if (expense.isRecurring && interval != null) {
-                            Text(
-                                " • ${
-                                    interval.lowercase()
-                                        .replaceFirstChar { it.uppercase() }
-                                }",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        if (expense.isInstallmentPayment && expense.installmentTotalMonths > 0) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                                    .padding(horizontal = 4.dp, vertical = 1.dp)
-                            ) {
-                                Text(
-                                    "${expense.installmentMonth} / ${expense.installmentTotalMonths}",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                        if (expense.status == "Pending") {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .padding(horizontal = 4.dp, vertical = 1.dp)
-                            ) {
-                                Text(
-                                    "Pending",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                    val dueDate = expense.nextDueDate
-                    if (showNextDueDate && dueDate != null) {
-                        val dateStr =
-                            com.sans.finance.core.util.DateFormatterUtils.getStandardFormatter()
-                                .format(java.util.Date(dueDate))
-                        Text(
-                            "Next: $dateStr",
+                            " • ${interval.lowercase().replaceFirstChar { it.uppercase() }}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.Bold
@@ -174,35 +143,67 @@ fun ExpenseItem(
                     }
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
-                    val displayAmount = overrideAmount
-                        ?: if (expense.isInstallment && expense.monthlyPayment > 0) expense.monthlyPayment else expense.amount
-                    val amountColor = when (expense.type) {
-                        "INCOME" -> Color(0xFF4CAF50)
-                        "EXPENSE" -> Color(0xFFE53935)
-                        "TRANSFER" -> Color(0xFF2196F3)
-                        else -> Color(0xFFE53935)
-                    }
-                    PrivacyText(
-                        amount = if (expense.type == "INCOME") displayAmount else -displayAmount,
-                        currencyCode = expense.currency,
-                        isVisible = !isPrivacyModeEnabled,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = amountColor
-                    )
-                    if (overrideLabel != null) {
-                        Text(
-                            text = overrideLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                if (expense.isInstallmentPayment && expense.installmentTotalMonths > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                "Installment ${expense.installmentMonth} / ${expense.installmentTotalMonths}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
                     }
                 }
             }
-            androidx.compose.material3.HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                thickness = 1.dp
-            )
+
+            // Amount
+            Column(horizontalAlignment = Alignment.End) {
+                val displayAmount = overrideAmount
+                    ?: if (expense.isInstallment && expense.monthlyPayment > 0) expense.monthlyPayment else expense.amount
+                val amountColor = when (expense.type) {
+                    "INCOME" -> Color(0xFF4CAF50)
+                    "EXPENSE" -> Color(0xFFE53935)
+                    "TRANSFER" -> Color(0xFF2196F3)
+                    else -> Color(0xFFE53935)
+                }
+                val prefix = when (expense.type) {
+                    "INCOME" -> "+"
+                    "EXPENSE" -> "-"
+                    else -> ""
+                }
+                
+                PrivacyText(
+                    amount = if (expense.type == "INCOME") displayAmount else -displayAmount,
+                    currencyCode = expense.currency,
+                    isVisible = !isPrivacyModeEnabled,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = amountColor
+                )
+                
+                if (expense.status == "Pending") {
+                    Text(
+                        "Pending",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                } else if (overrideLabel != null) {
+                    Text(
+                        text = overrideLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

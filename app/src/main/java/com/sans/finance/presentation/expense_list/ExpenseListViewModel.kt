@@ -483,4 +483,29 @@ class ExpenseListViewModel @Inject constructor(
             )
         }
     }
+
+    fun jumpToDate(millis: Long) {
+        val calendar = CalendarUtils.getInstance()
+        calendar.timeInMillis = millis
+        
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        
+        val start = calendar.timeInMillis
+        
+        calendar.add(Calendar.MONTH, 1)
+        val end = calendar.timeInMillis
+        
+        _state.update { 
+            it.copy(
+                startDate = start,
+                endDate = end,
+                activeDateFilter = DateRangeFilter.CUSTOM,
+                isLoading = true
+            )
+        }
+    }
 }

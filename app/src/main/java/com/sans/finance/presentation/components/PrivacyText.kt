@@ -17,7 +17,10 @@ fun PrivacyText(
     style: TextStyle = TextStyle.Default,
     fontWeight: FontWeight? = null,
     color: Color = Color.Unspecified,
-    isCompact: Boolean = false
+    isCompact: Boolean = false,
+    textAlign: androidx.compose.ui.text.style.TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: androidx.compose.ui.text.style.TextOverflow = androidx.compose.ui.text.style.TextOverflow.Clip
 ) {
     val text = if (isVisible) {
         if (isCompact) {
@@ -34,6 +37,9 @@ fun PrivacyText(
         modifier = modifier,
         style = style,
         fontWeight = fontWeight,
-        color = color
+        color = color,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }

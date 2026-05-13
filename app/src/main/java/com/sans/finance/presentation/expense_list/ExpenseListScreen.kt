@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DropdownMenu
@@ -56,6 +57,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -107,6 +110,7 @@ fun ExpenseListScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.error) {
         state.error?.let {
@@ -127,22 +131,37 @@ fun ExpenseListScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.previousMonth() }) {
+                        Icon(
+                            Icons.Default.ChevronLeft,
+                            contentDescription = "Prev",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
                 title = {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = { viewModel.previousMonth() }) {
-                            Icon(Icons.Default.ChevronLeft, contentDescription = "Prev")
+                        Surface(
+                            onClick = { showDatePicker = true },
+                            color = Color.Transparent,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                monthYear,
+                                fontWeight = FontWeight.ExtraBold,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
                         }
-                        Text(
-                            monthYear,
-                            fontWeight = FontWeight.ExtraBold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
                         IconButton(onClick = { viewModel.nextMonth() }) {
-                            Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = "Next",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 },
@@ -261,43 +280,38 @@ fun ExpenseListScreen(
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            color = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 1.dp,
+                            shape = MaterialTheme.shapes.medium
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = day,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        shape = MaterialTheme.shapes.small
-                                    ) {
+                                    Spacer(modifier = Modifier.size(12.dp))
+                                    Column {
                                         Text(
-                                            text = dayOfWeek,
+                                            text = dayOfWeek.uppercase(),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = monthYear,
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSecondary,
-                                            modifier = Modifier.padding(
-                                                horizontal = 4.dp,
-                                                vertical = 2.dp
-                                            )
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Text(
-                                        text = monthYear,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     if (dayIncome > 0) {
@@ -402,6 +416,32 @@ fun ExpenseListScreen(
                 }
             }
         )
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = if (state.startDate > 0) state.startDate else System.currentTimeMillis()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        viewModel.jumpToDate(it)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("Select")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 
 }
