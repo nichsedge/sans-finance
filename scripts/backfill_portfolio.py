@@ -7,7 +7,7 @@ import time
 
 # Configuration
 DB_PATH = "sans_finance_db"
-DATA_DIR = "./portfolio_data"
+DATA_DIR = os.getenv("PORTFOLIO_DATA_DIR", "./portfolio_data")
 SNAPSHOT_PATTERN = re.compile(r".*_snapshot\.json$")
 
 def extract_price(details):
