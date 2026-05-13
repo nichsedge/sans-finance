@@ -193,7 +193,7 @@ fun GoalItem(
                 Text(
                     "Target: ${
                         CurrencyFormatter.formatAmount(
-                            (goal.targetAmount * 100).toLong(),
+                            (goal.targetAmount * 100),
                             goal.currency
                         )
                     }",
@@ -216,7 +216,7 @@ fun AddGoalDialog(
     val isEditing = goalToEdit != null
     var name by remember(goalToEdit) { mutableStateOf(goalToEdit?.name ?: "") }
     var amount by remember(goalToEdit) {
-        mutableStateOf(goalToEdit?.targetAmount?.toLong()?.toString() ?: "")
+        mutableStateOf(goalToEdit?.targetAmount?.toString() ?: "")
     }
     var targetType by remember(goalToEdit) { mutableStateOf(goalToEdit?.targetType ?: "TOTAL") }
     var targetName by remember(goalToEdit) { mutableStateOf(goalToEdit?.targetName ?: "") }

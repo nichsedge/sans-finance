@@ -22,10 +22,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.AlertDialog
@@ -79,61 +80,71 @@ fun DashboardScreen(
     onRecurringExpensesClick: () -> Unit,
     onInstallmentsClick: () -> Unit,
     onWealthForecastingClick: () -> Unit,
+    onDataManagementClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var showViewMenu by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable { showViewMenu = true }
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            "Dashboard",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+                    Text(
+                        "Dashboard",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { showMenu = true }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Switch View",
-                            modifier = Modifier.size(20.dp)
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
                         )
+                    }
 
-                        DropdownMenu(
-                            expanded = showViewMenu,
-                            onDismissRequest = { showViewMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Dashboard") },
-                                onClick = { showViewMenu = false },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Dashboard,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Portfolio") },
-                                onClick = {
-                                    showViewMenu = false
-                                    onPortfolioClick()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.PieChart,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                        }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Dashboard") },
+                            onClick = { showMenu = false },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Dashboard,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Portfolio") },
+                            onClick = {
+                                showMenu = false
+                                onPortfolioClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.PieChart,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        DropdownMenuItem(
+                            text = { Text("Import & Export") },
+                            onClick = {
+                                showMenu = false
+                                onDataManagementClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.FileUpload,
+                                    contentDescription = null
+                                )
+                            }
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

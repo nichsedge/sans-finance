@@ -3,9 +3,9 @@ package com.sans.finance.presentation.main
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +70,9 @@ fun MainScreen(
                     },
                     onWealthForecastingClick = {
                         rootNavController.navigate(Screen.WealthForecasting)
+                    },
+                    onDataManagementClick = {
+                        rootNavController.navigate(Screen.DataManagement)
                     }
                 )
             }
@@ -92,6 +95,9 @@ fun MainScreen(
                     },
                     onExpenseClick = { id ->
                         rootNavController.navigate(Screen.EditExpense(id))
+                    },
+                    onDataManagementClick = {
+                        rootNavController.navigate(Screen.DataManagement)
                     }
                 )
             }
@@ -115,6 +121,9 @@ fun MainScreen(
                     },
                     onForecastingClick = {
                         rootNavController.navigate(Screen.WealthForecasting)
+                    },
+                    onDataManagementClick = {
+                        rootNavController.navigate(Screen.DataManagement)
                     }
                 )
             }
@@ -135,6 +144,9 @@ fun MainScreen(
                     },
                     onNavigateToRecurringExpenses = {
                         rootNavController.navigate(Screen.RecurringExpenses)
+                    },
+                    onNavigateToDataManagement = {
+                        rootNavController.navigate(Screen.DataManagement)
                     }
                 )
             }
@@ -153,7 +165,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     ) {
         val items = listOf(
             Triple(Screen.Dashboard, "Home", Icons.Default.Dashboard),
-            Triple(Screen.ExpenseList, "Transactions", Icons.Default.History),
+            Triple(Screen.ExpenseList, "Transactions", Icons.AutoMirrored.Filled.CompareArrows),
             Triple(Screen.Accounts, "Accounts", Icons.Default.AccountBalanceWallet),
             Triple(Screen.Settings, "Settings", Icons.Default.Settings)
         )

@@ -17,6 +17,7 @@ import com.sans.finance.presentation.main.MainScreen
 import com.sans.finance.presentation.navigation.Screen
 import com.sans.finance.presentation.search.SearchScreen
 import com.sans.finance.presentation.settings.SettingsScreen
+import com.sans.finance.presentation.settings.data.DataManagementScreen
 import com.sans.finance.ui.theme.SansFinanceTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -95,6 +96,9 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                 },
                 onExpenseClick = { id ->
                     navController.navigate(Screen.EditExpense(id))
+                },
+                onDataManagementClick = {
+                    navController.navigate(Screen.DataManagement)
                 }
             )
         }
@@ -107,6 +111,9 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                 onBack = { navController.popBackStack() },
                 onExpenseClick = { id ->
                     navController.navigate(Screen.EditExpense(id))
+                },
+                onDataManagementClick = {
+                    navController.navigate(Screen.DataManagement)
                 }
             )
         }
@@ -132,7 +139,8 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
                 onNavigateToBudgets = { navController.navigate(Screen.Budgets) },
                 onNavigateToCategories = { navController.navigate(Screen.CategorySettings) },
                 onNavigateToTags = { navController.navigate(Screen.TagSettings) },
-                onNavigateToRecurringExpenses = { navController.navigate(Screen.RecurringExpenses) }
+                onNavigateToRecurringExpenses = { navController.navigate(Screen.RecurringExpenses) },
+                onNavigateToDataManagement = { navController.navigate(Screen.DataManagement) }
             )
         }
         composable<Screen.RecurringExpenses> {
@@ -149,7 +157,8 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
         composable<Screen.Portfolio> {
             com.sans.finance.presentation.portfolio.PortfolioScreen(
                 onDashboardClick = { navController.popBackStack() },
-                onForecastingClick = { navController.navigate(Screen.WealthForecasting) }
+                onForecastingClick = { navController.navigate(Screen.WealthForecasting) },
+                onDataManagementClick = { navController.navigate(Screen.DataManagement) }
             )
         }
         composable<Screen.AccountStats> {
@@ -165,6 +174,11 @@ fun AppNavigation(onLanguageToggle: () -> Unit) {
         }
         composable<Screen.WealthForecasting> {
             com.sans.finance.presentation.forecasting.WealthForecastingScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable<Screen.DataManagement> {
+            DataManagementScreen(
                 onBack = { navController.popBackStack() }
             )
         }

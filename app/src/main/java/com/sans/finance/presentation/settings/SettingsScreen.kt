@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sync
@@ -77,6 +78,7 @@ fun SettingsScreen(
     onNavigateToCategories: () -> Unit,
     onNavigateToTags: () -> Unit,
     onNavigateToRecurringExpenses: () -> Unit,
+    onNavigateToDataManagement: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val currentLanguage = viewModel.currentLanguage.value
@@ -133,6 +135,7 @@ fun SettingsScreen(
             onNavigateToCategories = onNavigateToCategories,
             onNavigateToTags = onNavigateToTags,
             onNavigateToRecurringExpenses = onNavigateToRecurringExpenses,
+            onNavigateToDataManagement = onNavigateToDataManagement,
             exportBackup = { viewModel.exportFullBackup(it) },
             onLanguageToggle = onLanguageToggle,
             onCurrencyToggle = { viewModel.toggleCurrency() },
@@ -160,6 +163,7 @@ fun SettingsContent(
     onNavigateToCategories: () -> Unit,
     onNavigateToTags: () -> Unit,
     onNavigateToRecurringExpenses: () -> Unit,
+    onNavigateToDataManagement: () -> Unit,
     exportBackup: (android.content.Context) -> Unit,
     onLanguageToggle: () -> Unit,
     onCurrencyToggle: () -> Unit,
@@ -473,6 +477,42 @@ fun SettingsContent(
         // Data Management Section
         item {
             SettingsSectionTitle(stringResource(R.string.data_management))
+
+            Surface(
+                onClick = onNavigateToDataManagement,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.FileUpload,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Import & Export")
+                        Text(
+                            "CSV and JSON data handling",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
             Card(
                 onClick = { exportBackup(context) },
                 modifier = Modifier

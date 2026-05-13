@@ -62,5 +62,8 @@ sealed class Screen {
     object Search : Screen()
 
     @Serializable
+    object DataManagement : Screen()
+
+    @Serializable
     data class MonthlyReview(val monthOffset: Int = 0) : Screen()
 }

@@ -25,7 +25,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -100,7 +100,7 @@ fun AccountScreen(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.QueryStats,
+                                    Icons.Default.Insights,
                                     contentDescription = null
                                 )
                             }

@@ -18,8 +18,9 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
@@ -30,6 +31,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +78,7 @@ fun ExpenseListScreen(
     onRecurringExpensesClick: () -> Unit,
     onSearchClick: () -> Unit,
     onExpenseClick: (Long) -> Unit,
+    onDataManagementClick: () -> Unit,
     viewModel: ExpenseListViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -163,7 +166,7 @@ fun ExpenseListScreen(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.QueryStats,
+                                    Icons.Default.Insights,
                                     contentDescription = null
                                 )
                             }
@@ -185,6 +188,20 @@ fun ExpenseListScreen(
                             leadingIcon = {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ReceiptLong,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        DropdownMenuItem(
+                            text = { Text("Import & Export") },
+                            onClick = {
+                                showMenu = false
+                                onDataManagementClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.FileUpload,
                                     contentDescription = null
                                 )
                             }

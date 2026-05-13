@@ -3,7 +3,6 @@ package com.sans.finance.presentation.portfolio
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,9 +23,16 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -76,17 +82,12 @@ import java.util.Locale
 fun PortfolioScreen(
     onDashboardClick: () -> Unit,
     onForecastingClick: () -> Unit,
+    onDataManagementClick: () -> Unit,
     viewModel: PortfolioViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var showViewMenu by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.US) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { viewModel.importFile(it) }
-    }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -100,96 +101,94 @@ fun PortfolioScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    if (state.snapshotDates.isNotEmpty()) {
+                        IconButton(onClick = viewModel::onPreviousSnapshot) {
+                            Icon(
+                                Icons.Default.ChevronLeft,
+                                contentDescription = "Previous",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
                 title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.small)
-                                .clickable { showViewMenu = true }
-                                .padding(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
+                    if (state.snapshotDates.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "Portfolio",
-                                style = MaterialTheme.typography.titleMedium,
+                                state.selectedDate?.let { dateFormat.format(Date(it)) } ?: "",
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.ExtraBold
                             )
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Switch View",
-                                modifier = Modifier.size(20.dp)
-                            )
-
-                            DropdownMenu(
-                                expanded = showViewMenu,
-                                onDismissRequest = { showViewMenu = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Dashboard") },
-                                    onClick = {
-                                        showViewMenu = false
-                                        onDashboardClick()
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.Dashboard,
-                                            contentDescription = null
-                                        )
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Portfolio") },
-                                    onClick = { showViewMenu = false },
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.PieChart,
-                                            contentDescription = null
-                                        )
-                                    }
+                            IconButton(onClick = viewModel::onNextSnapshot) {
+                                Icon(
+                                    Icons.Default.ChevronRight,
+                                    contentDescription = "Next",
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
-                        if (state.snapshotDates.isNotEmpty()) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                    } else {
+                        Text(
+                            "Portfolio",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
 
-                                IconButton(onClick = viewModel::onPreviousSnapshot) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                        contentDescription = "Previous",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Text(
-                                    state.selectedDate?.let { dateFormat.format(Date(it)) } ?: "",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Black
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Dashboard") },
+                            onClick = {
+                                showMenu = false
+                                onDashboardClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Dashboard,
+                                    contentDescription = null
                                 )
-                                IconButton(onClick = viewModel::onNextSnapshot) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = "Next",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
                             }
-                        }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Portfolio") },
+                            onClick = { showMenu = false },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.PieChart,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Import & Export") },
+                            onClick = {
+                                showMenu = false
+                                onDataManagementClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.FileUpload,
+                                    contentDescription = null
+                                )
+                            }
+                        )
                     }
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { launcher.launch("*/*") },
-                shape = MaterialTheme.shapes.large
-            ) {
-                Icon(Icons.Default.UploadFile, contentDescription = "Import Snapshot")
-            }
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         if (state.isLoading) {
             Box(
@@ -209,7 +208,7 @@ fun PortfolioScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        Icons.Default.QueryStats,
+                        Icons.Default.Analytics,
                         contentDescription = null,
                         modifier = Modifier.size(80.dp),
                         tint = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)

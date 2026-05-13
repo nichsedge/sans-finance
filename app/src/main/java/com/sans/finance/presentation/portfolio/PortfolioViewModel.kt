@@ -8,6 +8,7 @@ import com.sans.finance.data.local.dao.CategoryTotal
 import com.sans.finance.data.local.dao.SnapshotTotal
 import com.sans.finance.data.local.entity.PortfolioHoldingEntity
 import com.sans.finance.data.util.LocaleManager
+import com.sans.finance.data.util.PortfolioJsonExporter
 import com.sans.finance.data.util.PortfolioJsonImporter
 import com.sans.finance.domain.model.AssetClassHealth
 import com.sans.finance.domain.repository.PortfolioRepository
@@ -156,6 +157,23 @@ class PortfolioViewModel @Inject constructor(
                 _importMessage.value = "Imported ${items.size} holdings"
             } catch (e: Exception) {
                 _importMessage.value = "Import failed: ${e.message}"
+            }
+        }
+    }
+
+    fun exportFile(uri: Uri) {
+        viewModelScope.launch {
+            try {
+                val selectedDate = state.value.selectedDate ?: return@launch
+                val holdings = repository.getSnapshotByDateSync(selectedDate)
+                val jsonString = PortfolioJsonExporter.toSnapshotJson(selectedDate, holdings)
+
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    outputStream.bufferedWriter().use { it.write(jsonString) }
+                }
+                _importMessage.value = "Portfolio exported successfully"
+            } catch (e: Exception) {
+                _importMessage.value = "Export failed: ${e.message}"
             }
         }
     }
