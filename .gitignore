@@ -1,18 +1,39 @@
+# Gradle files
+.gradle/
+build/
+**/build/
+
+# Kotlin
+.kotlin/
+
+# IntelliJ IDEA / Android Studio
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
+*.iws
+*.ipr
+out/
+
+# Android
+local.properties
+/captures/
 .externalNativeBuild
 .cxx
-local.properties
+*.hprof
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.apk
+*.aar
+*.jar
+/release/
+
+# Project specific
 sans_finance_db_snapshot.sqlite
 app/src/main/assets/seed_transactions.csv
-/release/
+backup.sh.bak
+restore.sh.bak
+sync.sh.bak
+push_portfolio.sh.bak
