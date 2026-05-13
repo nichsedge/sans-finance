@@ -124,7 +124,9 @@ class ExpenseRepositoryImpl(
                     description = parentExpense?.expense?.description,
                     accountId = parentExpense?.expense?.accountId ?: 1L,
                     currency = parentExpense?.expense?.currency ?: "USD",
-                    tags = parentExpense?.tags?.map { it.name } ?: emptyList()
+                    tags = parentExpense?.tags?.map { it.name } ?: emptyList(),
+                    categoryName = parentExpense?.category?.name,
+                    categoryIcon = parentExpense?.category?.icon
                 )
             }
         } else {
@@ -507,7 +509,9 @@ class ExpenseRepositoryImpl(
             currency = expense.currency,
             totalPaid = totalPaid,
             remainingBalance = installment?.remainingBalance ?: 0L,
-            monthlyPayment = installment?.monthlyPayment ?: 0L
+            monthlyPayment = installment?.monthlyPayment ?: 0L,
+            categoryName = category?.name,
+            categoryIcon = category?.icon
         )
     }
 
@@ -549,7 +553,9 @@ class ExpenseRepositoryImpl(
             accountId = this.accountId,
             currency = this.currency,
             tags = this.tagsList?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
-                ?: emptyList()
+                ?: emptyList(),
+            categoryName = this.categoryName,
+            categoryIcon = this.categoryIcon
         )
     }
 

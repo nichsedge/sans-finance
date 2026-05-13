@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sans.finance.core.util.CurrencyFormatter
+import com.sans.finance.presentation.components.CategoryIcon
 import com.sans.finance.presentation.components.GlassCard
 import com.sans.finance.presentation.components.PrivacyText
 import java.util.Locale
@@ -77,6 +78,7 @@ fun DashboardScreen(
     onTransactionClick: (Long) -> Unit,
     onPortfolioClick: () -> Unit,
     onRecurringExpensesClick: () -> Unit,
+    onInstallmentsClick: () -> Unit,
     onWealthForecastingClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -248,6 +250,7 @@ fun DashboardScreen(
 
             if (state.upcomingBills.isNotEmpty()) {
                 item {
+                    var showBillsMenu by remember { mutableStateOf(false) }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -259,12 +262,33 @@ fun DashboardScreen(
                             color = MaterialTheme.colorScheme.secondary,
                             letterSpacing = 1.5.sp
                         )
-                        Text(
-                            "See All",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable { onRecurringExpensesClick() }
-                        )
+                        Box {
+                            Text(
+                                "See All",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable { showBillsMenu = true }
+                            )
+                            DropdownMenu(
+                                expanded = showBillsMenu,
+                                onDismissRequest = { showBillsMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Recurring Payments") },
+                                    onClick = {
+                                        showBillsMenu = false
+                                        onRecurringExpensesClick()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Installments") },
+                                    onClick = {
+                                        showBillsMenu = false
+                                        onInstallmentsClick()
+                                    }
+                                )
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     state.upcomingBills.forEach { bill ->
@@ -794,35 +818,54 @@ fun DashboardBillItem(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                alpha = 0.2f
+                alpha = 0.15f
             )
-        )
+        ),
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                        MaterialTheme.shapes.medium
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                CategoryIcon(
+                    icon = bill.categoryIcon ?: "",
+                    fontSize = 20.sp
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    bill.note,
+                    text = bill.note.ifBlank { bill.categoryName ?: "Upcoming Bill" },
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    if (bill.isInstallmentPayment) "Installment ${bill.installmentMonth}/${bill.installmentTotalMonths}"
+                    text = if (bill.isInstallmentPayment) "Installment ${bill.installmentMonth}/${bill.installmentTotalMonths}"
                     else "Recurring Payment",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             PrivacyText(
                 amount = bill.amount,
                 currencyCode = bill.currency,
                 isVisible = !isPrivacyModeEnabled,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -1251,46 +1294,55 @@ fun RecentTransactionItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = MaterialTheme.shapes.medium
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val isIncome = transaction.type == "INCOME"
+            
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .background(
-                        if (transaction.type == "INCOME") Color(0xFFE8F5E9) else Color(0xFFFBE9E7),
-                        androidx.compose.foundation.shape.CircleShape
+                        if (isIncome) Color(0xFFE8F5E9) else Color(0xFFFBE9E7),
+                        MaterialTheme.shapes.medium
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = if (transaction.type == "INCOME") Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                    contentDescription = null,
-                    tint = if (transaction.type == "INCOME") Color(0xFF4CAF50) else Color(0xFFF44336),
-                    modifier = Modifier.size(20.dp)
+                CategoryIcon(
+                    icon = transaction.categoryIcon ?: (if (isIncome) "💰" else "💸"),
+                    fontSize = 24.sp
                 )
             }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = transaction.note,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = transaction.note.ifBlank { transaction.categoryName ?: "Transaction" },
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
-                Text(
-                    text = transaction.description ?: "No description",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
+                val subtitle = if (transaction.note.isNotBlank()) {
+                    transaction.description ?: transaction.categoryName ?: ""
+                } else {
+                    transaction.description ?: ""
+                }
+                
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
 
             Column(horizontalAlignment = Alignment.End) {
@@ -1298,15 +1350,16 @@ fun RecentTransactionItem(
                     amount = transaction.amount,
                     currencyCode = transaction.currency,
                     isVisible = !isPrivacyModeEnabled,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (transaction.type == "INCOME") Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = if (isIncome) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = com.sans.finance.core.util.DateFormatterUtils.getStandardFormatter()
                         .format(java.util.Date(transaction.date)),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }

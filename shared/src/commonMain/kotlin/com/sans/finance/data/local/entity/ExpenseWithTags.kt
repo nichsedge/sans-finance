@@ -20,5 +20,10 @@ data class ExpenseWithTags(
         parentColumn = "id",
         entityColumn = "expense_id"
     )
-    val installment: InstallmentEntity?
+    val installment: InstallmentEntity?,
+    @Relation(
+        parentColumn = "category_id",
+        entityColumn = "id"
+    )
+    val category: CategoryEntity?
 )

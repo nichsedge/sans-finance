@@ -27,5 +27,7 @@ data class Expense(
     // Installment specific fields
     val totalPaid: Long = 0L,
     val remainingBalance: Long = 0L,
-    val monthlyPayment: Long = 0L
+    val monthlyPayment: Long = 0L,
+    val categoryName: String? = null,
+    val categoryIcon: String? = null
 )

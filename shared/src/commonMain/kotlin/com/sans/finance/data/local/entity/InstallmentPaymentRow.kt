@@ -15,7 +15,9 @@ data class InstallmentPaymentRow(
     @ColumnInfo(name = "total_months") val totalMonths: Int = 0,
     @ColumnInfo(name = "status") val status: String = "Paid",
     @ColumnInfo(name = "tags_list") val tagsList: String? = null,
-    @ColumnInfo(name = "currency") val currency: String = "USD"
+    @ColumnInfo(name = "currency") val currency: String = "USD",
+    @ColumnInfo(name = "category_name") val categoryName: String? = null,
+    @ColumnInfo(name = "category_icon") val categoryIcon: String? = null
 )
 
 

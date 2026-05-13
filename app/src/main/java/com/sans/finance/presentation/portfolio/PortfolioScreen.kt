@@ -407,18 +407,6 @@ fun PortfolioHeader(state: PortfolioScreenState, onForecastingClick: () -> Unit)
             }
         }
 
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "≈ ${
-                if (state.isPrivacyModeEnabled) "••••" else String.format(
-                    "%,.2f",
-                    state.totalValueUsd
-                )
-            } USD",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-
         Spacer(Modifier.height(16.dp))
         Button(
             onClick = onForecastingClick,
@@ -467,13 +455,14 @@ fun HoldingItem(holding: PortfolioHoldingEntity, isPrivacyModeEnabled: Boolean) 
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (holding.amount > 0) {
+                val amountText = if (isPrivacyModeEnabled) "••••" else String.format("%.4f", holding.amount)
+                val priceText = if (holding.price != null) {
+                    val formattedPrice = if (isPrivacyModeEnabled) "••••" else String.format("%,.2f", holding.price)
+                    " x $formattedPrice"
+                } else ""
+
                 Text(
-                    text = "${
-                        if (isPrivacyModeEnabled) "••••" else String.format(
-                            "%.4f",
-                            holding.amount
-                        )
-                    } ${holding.currency}",
+                    text = "$amountText$priceText ${holding.currency}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

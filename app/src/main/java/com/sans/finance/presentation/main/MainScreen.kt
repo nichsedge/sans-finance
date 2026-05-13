@@ -65,6 +65,9 @@ fun MainScreen(
                     onRecurringExpensesClick = {
                         rootNavController.navigate(Screen.RecurringExpenses)
                     },
+                    onInstallmentsClick = {
+                        rootNavController.navigate(Screen.Installments)
+                    },
                     onWealthForecastingClick = {
                         rootNavController.navigate(Screen.WealthForecasting)
                     }
