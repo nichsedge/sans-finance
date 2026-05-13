@@ -106,7 +106,7 @@ class PortfolioViewModel @Inject constructor(
                 selectedDateIndex = validIndex,
                 selectedDate = selectedDate,
                 valueHistory = history,
-                currentCurrency = "IDR",
+                currentCurrency = currency,
                 isLoading = false,
                 importMessage = importMsg,
                 previousTotalIdr = previousTotalIdr,

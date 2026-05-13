@@ -48,8 +48,8 @@ class PortfolioRepositoryImpl(
         val totalIdr = items.sumOf { it.valueIdr }
 
         // Estimate exchange rate if not provided (fallback to a reasonable default or calculate from items)
-        val rate = exchangeRate ?: items.filter { it.currency == "USD" && it.amount > 0 }
-            .map { it.valueIdr / it.amount }
+        val rate = exchangeRate ?: items.filter { it.currency == "USD" && it.quantity > 0 }
+            .map { it.valueIdr / it.quantity }
             .average()
             .takeIf { !it.isNaN() } ?: 16000.0 // Default fallback
 

@@ -76,20 +76,27 @@ def main():
         # Insert Holdings
         for h in holdings:
             details = h.get("details")
-            price = extract_price(details)
-            
-            # Use 0.0 as default for NOT NULL columns if JSON has null (coercion)
-            amount = h.get("amount")
-            if amount is None:
-                amount = 0.0
+            # Prioritize price field from JSON, fallback to extraction from details
+            price = h.get("price")
+            if price is None:
+                price = extract_price(details)
+            # Use quantity from JSON, fallback to amount, then value_idr for IDR assets
+            quantity = h.get("quantity")
+            if quantity is None:
+                quantity = h.get("amount")
                 
+            if (quantity is None or quantity == 0) and h.get("currency") == "IDR":
+                quantity = h.get("value_idr") or 0.0
+            elif quantity is None:
+                quantity = 0.0
+ 
             value_idr = h.get("value_idr")
             if value_idr is None:
                 value_idr = 0.0
-
+ 
             cursor.execute("""
                 INSERT INTO portfolio_holdings 
-                (snapshot_date, source, category, asset, currency, amount, price, value_idr, account, details, asset_class)
+                (snapshot_date, source, category, asset, currency, quantity, price, value_idr, account, details, asset_class)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 snapshot_date,
@@ -97,7 +104,7 @@ def main():
                 h.get("category") or "",
                 h.get("asset") or "",
                 h.get("currency") or "IDR",
-                amount,
+                quantity,
                 price,
                 value_idr,
                 h.get("account") or "",

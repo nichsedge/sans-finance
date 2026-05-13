@@ -382,7 +382,7 @@ fun AssetCategoryGroup(
             }
 
             holdings.forEachIndexed { index, holding ->
-                HoldingItem(holding, isPrivacyModeEnabled)
+                HoldingItem(holding, isPrivacyModeEnabled, currentCurrency)
                 if (index < holdings.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -464,7 +464,11 @@ fun PortfolioHeader(state: PortfolioScreenState, onForecastingClick: () -> Unit)
 }
 
 @Composable
-fun HoldingItem(holding: PortfolioHoldingEntity, isPrivacyModeEnabled: Boolean) {
+fun HoldingItem(
+    holding: PortfolioHoldingEntity,
+    isPrivacyModeEnabled: Boolean,
+    currentCurrency: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -489,21 +493,36 @@ fun HoldingItem(holding: PortfolioHoldingEntity, isPrivacyModeEnabled: Boolean) 
         Column(horizontalAlignment = Alignment.End) {
             PrivacyText(
                 amount = (holding.valueIdr * 100).toLong(),
-                currencyCode = "IDR",
+                currencyCode = currentCurrency,
                 isVisible = !isPrivacyModeEnabled,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (holding.amount > 0) {
-                val amountText = if (isPrivacyModeEnabled) "••••" else String.format(Locale.US, "%,.4f", holding.amount)
-                val priceText = if (holding.price != null) {
-                    val formattedPrice = if (isPrivacyModeEnabled) "••••" else String.format(Locale.US, "%,.2f", holding.price)
-                    " @ $formattedPrice"
-                } else ""
+            if (holding.quantity > 0 && holding.price != null) {
+                val quantity = holding.quantity
+                val price = holding.price
+                
+                val quantityFormatted = when {
+                    quantity >= 1_000_000 -> String.format(Locale.US, "%,.2fM", quantity / 1_000_000.0)
+                    quantity >= 1_000 -> String.format(Locale.US, "%,.0f", quantity)
+                    quantity >= 1 -> String.format(Locale.US, "%,.4f", quantity)
+                    else -> String.format(Locale.US, "%.8f", quantity).trimEnd('0').trimEnd('.')
+                }
+
+                val displayValue = if (isPrivacyModeEnabled) "••••" else {
+                    val priceNonNull = price!!
+                    val priceFormatted = when {
+                        priceNonNull >= 1_000_000 -> String.format(Locale.US, "%,.1fM", priceNonNull / 1_000_000.0)
+                        priceNonNull >= 1_000 -> String.format(Locale.US, "%,.0f", priceNonNull)
+                        priceNonNull >= 1 -> String.format(Locale.US, "%,.2f", priceNonNull)
+                        else -> String.format(Locale.US, "%,.4f", priceNonNull)
+                    }
+                    "$quantityFormatted @ $priceFormatted ${holding.currency}"
+                }
 
                 Text(
-                    text = "$amountText ${holding.currency}$priceText",
+                    text = displayValue,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
