@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Sans Finance</string>
-    <string name="add_expense">Catat Pengeluaran</string>
+    <string name="add_transaction">Catat Transaksi</string>
     <string name="amount_spent">Jumlah Pengeluaran</string>
     <string name="category">Kategori</string>
     <string name="what_did_you_buy">Catatan</string>
