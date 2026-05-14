@@ -16,11 +16,11 @@ import org.json.JSONObject
 class SyncExchangeRatesWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val currencyDao: CurrencyDao
+    private val currencyDao: CurrencyDao,
+    private val client: OkHttpClient
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val client = OkHttpClient()
         // Using a free API (v6.exchangerate-api.com has a free tier, but requires key)
         // For demonstration, we'll use a public one that doesn't need key if available,
         // or just fallback to hardcoded rates if it fails.

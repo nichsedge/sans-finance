@@ -13,6 +13,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import okhttp3.OkHttpClient
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -146,6 +148,13 @@ object AppModule {
     @Singleton
     fun provideInstallmentRepository(dao: com.sans.finance.data.local.dao.InstallmentDao): com.sans.finance.domain.repository.InstallmentRepository =
         com.sans.finance.data.repository.InstallmentRepositoryImpl(dao)
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
 
     @Provides
     @Singleton
